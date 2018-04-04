@@ -11,7 +11,7 @@
 #include "G8RTOS.h"
 /* Standard Includes */
 #include <stdint.h>
-#include "app.h"
+//#include "app.h"
 #include "Game.h"
 
 #include <string.h>
@@ -51,7 +51,7 @@ int frames =0;
 
 volatile uint16_t RXDataH = 0;
 volatile uint16_t RXData_xp = 0;
-void IdleThread();
+
 uint8_t RedTemp =0;
 uint8_t    BlueTemp =0;
 uint8_t    GreenTemp =0;
@@ -97,154 +97,154 @@ void main(void)
 {
 
 
-    MAP_WDT_A_holdTimer();
-
-    G8RTOS_Init();
-       //initSPI();
-       //initUARTP9();
-
-       initUARTP3();
-
-       //initReceiveInt();
-       //initADC();
-
-   //    while(1)
-   //    {
-   //        //MAP_UART_transmitData(EUSCI_A2_BASE, '5');
-   //        //while(UCA2STATW & UCBUSY);
-   //        byte = MAP_UART_receiveData(EUSCI_A3_BASE);
-   //        while(UCA3STATW & UCBUSY);
-   //        //for(int i = 0; i < 100000; i++);
-   //    }
-
-   //    P6->SEL0 = 0;
-   //    P6->DIR = 0xff;
-   //    P6->OUT = 0x00;
-   //
-   //    while(1)
-   //    {
-   //
-   //        P6->OUT ^= 0x01;
-   //        //for(int j = 0; j < 10000; j++);
-   ////        P6->OUT = 0xff;
-   //    }
-
-       //G8RTOS_AddThread(&IdleThread, "idle", 255);
-       //G8RTOS_AddThread(&ReadThread, "ReadThread", 1);
-       //G8RTOS_Launch();
-
-       int16_t *xcoord;
-       int16_t *ycoord;
-       int16_t x, y;
-       uint8_t buttons;
-
-       P4->DIR = 0x00;
-       P4->REN = BIT0 || BIT1 || BIT2;
-       P4->OUT = BIT0 || BIT1 || BIT2;
-
-       BSP_InitBoard();
-
-       while(1)
-       {
-           GetJoystickCoordinates(&xcoord, &ycoord);
-           x = xcoord;
-           y = ycoord;
-
-           tempx = xcoord;
-           tempy = ycoord;
-
-           if(y < -2000)
-           {
-               byte = 0b00000001;
-               //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
-           }
-           else if(y >= -2000 && y < 2000)
-           {
-               byte = 0b00000000;
-               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-           }
-           else if(y >= 2000)
-           {
-               byte = 0b00000010;
-               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-           }
-
-           if(x < -2000)
-           {
-               byte = byte | 0b00001000;
-               //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
-           }
-           else if(x >= -2000 && x < 2000)
-           {
-               byte = byte & 0b11110111;
-               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-           }
-           else if(x >= 2000)
-           {
-               byte = byte | 0b00000100;
-               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-           }
-
-           buttons = P4->IN;
-           if((buttons & 0x01) == 0x01 || (buttons & 0x02) == 0x02 || (buttons & 0x04) == 0x04)
-           {
-               byte = byte | 0b00010000;
-           }
-           else
-           {
-               byte = byte & 0b11101111;
-           }
-
-           MAP_UART_transmitData(EUSCI_A2_BASE, byte);
-
-           //transmitSPI(i);
-           //i++;
-           //for(int x = 0; x < 10000; x++);
-           //if(i > 0x7ff) i = 0x4ff;
-
-       }
-
-   //    uint16_t data = 0;
-   //
-   //    while(1)
-   //    {
-   //        data = ReceiveUART();
-   //    }
-
-
-
-
-
-
-
 //    MAP_WDT_A_holdTimer();
 //
-//    BSP_InitBoard();
-//  G8RTOS_Init();
-//  ButtonsInit();
-//    initUART();
+//    G8RTOS_Init();
+//       //initSPI();
+//       //initUARTP9();
 //
-//    G8RTOS_InitSemaphore(&XpData, 1);
+//       initUARTP3();
 //
+//       //initReceiveInt();
+//       //initADC();
 //
+//   //    while(1)
+//   //    {
+//   //        //MAP_UART_transmitData(EUSCI_A2_BASE, '5');
+//   //        //while(UCA2STATW & UCBUSY);
+//   //        byte = MAP_UART_receiveData(EUSCI_A3_BASE);
+//   //        while(UCA3STATW & UCBUSY);
+//   //        //for(int i = 0; i < 100000; i++);
+//   //    }
 //
-//       G8RTOS_AddThread(&IdleThread, "idle", 255);
-//       G8RTOS_AddThread(&display_arena, "Arena", 1);
-//       G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
-//       G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
-//       G8RTOS_AddThread(&output_frame, "outputFrame", 1);
-//       G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
-//       G8RTOS_AddThread(&displayBackground, "Background", 1);
+//   //    P6->SEL0 = 0;
+//   //    P6->DIR = 0xff;
+//   //    P6->OUT = 0x00;
+//   //
+//   //    while(1)
+//   //    {
+//   //
+//   //        P6->OUT ^= 0x01;
+//   //        //for(int j = 0; j < 10000; j++);
+//   ////        P6->OUT = 0xff;
+//   //    }
 //
+//       //G8RTOS_AddThread(&IdleThread, "idle", 255);
+//       //G8RTOS_AddThread(&ReadThread, "ReadThread", 1);
+//       //G8RTOS_Launch();
 //
-//      G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-//       G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+//       int16_t *xcoord;
+//       int16_t *ycoord;
+//       int16_t x, y;
+//       uint8_t buttons;
 //
+//       P4->DIR = 0x00;
+//       P4->REN = BIT0 || BIT1 || BIT2;
+//       P4->OUT = BIT0 || BIT1 || BIT2;
 //
-//      // bufferGreen[0] = 0x01;
-//         // bufferBlue[0]= 0;
-//           //bufferRed[0] =0;
-//       G8RTOS_Launch();
+//       BSP_InitBoard();
+//
+//       while(1)
+//       {
+//           GetJoystickCoordinates(&xcoord, &ycoord);
+//           x = xcoord;
+//           y = ycoord;
+//
+//           tempx = xcoord;
+//           tempy = ycoord;
+//
+//           if(y < -2000)
+//           {
+//               byte = 0b00000001;
+//               //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
+//           }
+//           else if(y >= -2000 && y < 2000)
+//           {
+//               byte = 0b00000000;
+//               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//           }
+//           else if(y >= 2000)
+//           {
+//               byte = 0b00000010;
+//               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//           }
+//
+//           if(x < -2000)
+//           {
+//               byte = byte | 0b00001000;
+//               //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
+//           }
+//           else if(x >= -2000 && x < 2000)
+//           {
+//               byte = byte & 0b11110111;
+//               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//           }
+//           else if(x >= 2000)
+//           {
+//               byte = byte | 0b00000100;
+//               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//           }
+//
+//           buttons = P4->IN;
+//           if((buttons & 0x01) == 0x01 || (buttons & 0x02) == 0x02 || (buttons & 0x04) == 0x04)
+//           {
+//               byte = byte | 0b00010000;
+//           }
+//           else
+//           {
+//               byte = byte & 0b11101111;
+//           }
+//
+//           MAP_UART_transmitData(EUSCI_A2_BASE, byte);
+//
+//           //transmitSPI(i);
+//           //i++;
+//           //for(int x = 0; x < 10000; x++);
+//           //if(i > 0x7ff) i = 0x4ff;
+//
+//       }
+//
+//   //    uint16_t data = 0;
+//   //
+//   //    while(1)
+//   //    {
+//   //        data = ReceiveUART();
+//   //    }
+
+
+
+
+
+
+
+    MAP_WDT_A_holdTimer();
+
+    BSP_InitBoard();
+  G8RTOS_Init();
+  ButtonsInit();
+    initUART();
+
+    G8RTOS_InitSemaphore(&XpData, 1);
+
+
+
+       G8RTOS_AddThread(&IdleThread, "idle", 255);
+       G8RTOS_AddThread(&display_arena, "Arena", 1);
+       G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
+       G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
+       G8RTOS_AddThread(&output_frame, "outputFrame", 1);
+       G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
+       G8RTOS_AddThread(&displayBackground, "Background", 1);
+
+
+      G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+       G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+
+
+      // bufferGreen[0] = 0x01;
+         // bufferBlue[0]= 0;
+           //bufferRed[0] =0;
+       G8RTOS_Launch();
 
 
 }
@@ -665,58 +665,6 @@ void initUART()
     /* Enable UART module */
     MAP_UART_enableModule(EUSCI_A3_BASE);
 }
-
-
-void display_arena(){
- uint8_t line_x_start = 10;
- uint8_t line_y_start = 0;
- uint8_t line_x_end = 11;
- uint8_t line_end = 64;
- int color = 0x0000FF00;
-
-// out_image(GreenBug, 10, 20, 5,5);
-//      out_image(GreenBug, 10, 27, 5,5);
-//      out_image(GreenBug, 10, 34, 5,5);
-//      out_image(GreenBug, 10, 41, 5,5);
-//      out_image(GreenBug, 10, 48, 5,5);
-//      out_image(GreenBug, 10, 55, 5,5);
-//      out_image(GreenBug, 17, 23, 5,5);
-//      out_image(GreenBug, 17, 30, 5,5);
-//      out_image(GreenBug, 17, 37, 5,5);
-//      out_image(GreenBug, 17, 44, 5,5);
-//      out_image(GreenBug, 17, 51, 5,5);
-//      out_image(GreenBug, 24, 27, 5,5);
-//      out_image(GreenBug, 24, 34, 5,5);
-//      out_image(GreenBug, 24, 41, 5,5);
-//      out_image(GreenBug, 24, 48, 5,5);
-
-      LM_Text(2,1,0,0X00FF0000);
-                LM_Text(6,1,1,0X00FF9933);
-                LM_Text(2,7,2,0X00FFFF00);
-                LM_Text(6,7,3,0X0080FF00);
-                LM_Text(2,13,4,0X0000FFFF);
-                LM_Text(6,13,5,0X000000FF);
-                LM_Text(2,19,6,0X000000FF);
-                LM_Text(6,19,7,0X00990099);
-                LM_Text(2,25,8,0X00FFFFFF);
-                LM_Text(6,25,9,0X00FF6666);
-            add_rectangle( color, line_x_start, line_x_end, line_y_start, line_end);
-
-
-
-    while(1){
-
-
-
-
-
-        G8RTOS_OS_Sleep(1);
-
-    }
-
-}
-
-
 
 void output_frame(){
 

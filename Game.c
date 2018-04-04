@@ -58,7 +58,7 @@ struct green_bug {
 
 typedef struct green_bug green_bug_t;
 
-
+uint8_t scoreValue = 0;
 static green_bug_t bugs_table[numOfBugs];
 uint8_t bullet_flag = 0;
 volatile uint8_t RXDataL, RXDataL_temp = 0;
@@ -91,11 +91,11 @@ uint32_t GalagaShip[72]= {     0,0,0,0,0X00FF6666,0,0,0,0,
                                0X00FF6666,0X00FF6666,0,0xFF0000,0X00FF6666,0xFF0000,0,0X00FF6666,0X00FF6666,
                                0X00FF6666,0,0,0,0X00FF6666,0,0,0,0X00FF6666};
 
-uint32_t GreenBug [25] = {0x0000994C,0,0,0,0x0000994C,
-                          0x0000994C,0x00FFFF00,0x00FFFF00,0x00FFFF00,0x0000994C,
-                          0,0X00FF00FF,0x00FFFF00,0X00FF00FF,0,
-                          0x0000994C,0x00FFFF00,0X00FF00FF,0x00FFFF00,0x0000994C,
-                          0x0000994C,0,0x00FFFF00,0,0x0000994C,};
+uint32_t GreenBug [25] = {0x0000592C,0,0,0,0x0000592C,
+                          0x0000592C,0x007F7F00,0x007F7F00,0x007F7F00,0x0000592C,
+                          0,0X007F007F,0x007F7F00,0X007F007F,0,
+                          0x0000592C,0x007F7F00,0X007F007F,0x007F7F00,0x0000592C,
+                          0x0000592C,0,0x007F7F00,0,0x0000592C,};
 
 
 
@@ -117,6 +117,95 @@ uint32_t Fire3 [25] = {0,0,0,0,0,
                        0,0x00FF3300,0x00FF3300,0x00FF3300,0,
                        0,0,0x00FF3300,0,0,
                        0,0,0,0,0,};
+
+void IdleThread()
+{
+    while(1);
+}
+
+void ButtonsInit()
+{
+    P3->SEL0 = 0;
+    P4->SEL0 = 0;
+    P5->SEL0 = 0;
+    P6->SEL0 = 0;
+
+    P3->DIR = 0xFF;
+    P4->DIR = 0xFF;
+    P5->DIR = 0xFF;
+    P6->DIR |= 0b00000001;
+    //P2->DIR = 0;
+    //P6->SEL0 =0;
+    //P6->DIR = 0b11111111;
+}
+
+void display_arena(){
+ uint8_t line_x_start = 10;
+ uint8_t line_y_start = 0;
+ uint8_t line_x_end = 11;
+ uint8_t line_end = 64;
+ int color = 0x0000FF00;
+
+// out_image(GreenBug, 10, 20, 5,5);
+//      out_image(GreenBug, 10, 27, 5,5);
+//      out_image(GreenBug, 10, 34, 5,5);
+//      out_image(GreenBug, 10, 41, 5,5);
+//      out_image(GreenBug, 10, 48, 5,5);
+//      out_image(GreenBug, 10, 55, 5,5);
+//      out_image(GreenBug, 17, 23, 5,5);
+//      out_image(GreenBug, 17, 30, 5,5);
+//      out_image(GreenBug, 17, 37, 5,5);
+//      out_image(GreenBug, 17, 44, 5,5);
+//      out_image(GreenBug, 17, 51, 5,5);
+//      out_image(GreenBug, 24, 27, 5,5);
+//      out_image(GreenBug, 24, 34, 5,5);
+//      out_image(GreenBug, 24, 41, 5,5);
+//      out_image(GreenBug, 24, 48, 5,5);
+
+//     LM_Text(1,1,0,0X00FF0000);
+//     LM_Text(5,1,1,0X00FF9933);
+//     LM_Text(1,7,2,0X00FFFF00);
+//     LM_Text(5,7,3,0X0080FF00);
+//     LM_Text(1,13,4,0X0000FFFF);
+//     LM_Text(5,13,5,0X000000FF);
+//     LM_Text(1,19,6,0X000000FF);
+//     LM_Text(5,19,7,0X00990099);
+//     LM_Text(1,25,8,0X00FFFFFF);
+//     LM_Text(5,25,9,0X00FF6666);
+     add_rectangle( 0x00000f00, line_x_start, line_x_end, line_y_start, line_end);
+
+
+
+    while(1){
+
+
+
+        //G8RTOS_WaitSemaphore(&scoreSem);
+
+        writeScore(scoreValue, 0x00ff0000);
+        //G8RTOS_SignalSemaphore(&scoreSem);
+        G8RTOS_OS_Sleep(55);
+
+    }
+
+}
+
+void writeScore(uint8_t score, int color)
+{
+    add_rectangle(0, 0, 9, 49, 56);
+    if(score < 10)
+    {
+        LM_Text(2, 50, score, color);
+    }
+    else
+    {
+        uint8_t ones = 0, tens = 0;
+        tens = score / 10;
+        ones = score % 10;
+        LM_Text(2, 50, tens, color);
+        LM_Text(6, 50, ones, color);
+    }
+}
 
 void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor)
 {
@@ -378,8 +467,8 @@ void  ReceiveUART()
     while(1){
 
         //  G8RTOS_WaitSemaphore(&XpData);
- int i;
- i++;
+// int i;
+// i++;
 
         RXDataL = MAP_UART_receiveData(EUSCI_A3_BASE);
 
@@ -391,7 +480,7 @@ void  ReceiveUART()
 
         // return RXDataL;
 
-        G8RTOS_OS_Sleep(75);
+        G8RTOS_OS_Sleep(89);
     }
 }
 
@@ -546,6 +635,11 @@ void move_greenBug() {
 
         if(bugs_table[i].alive == 0){
 
+            scoreValue++;
+            if(scoreValue == 100)
+            {
+                scoreValue = 0;
+            }
 
             out_exposion( bugs_table[i].ypos,  bugs_table[i].xpos);
             add_rectangle( 0, bugs_table[i].xpos, bugs_table[i].xpos+5, bugs_table[i].ypos, bugs_table[i].ypos+5);
