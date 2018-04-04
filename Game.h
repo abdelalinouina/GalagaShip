@@ -30,6 +30,8 @@ void ReceiveUART();
 void ReceiveUART2();
 void move_bullet();
 void IdleThread();
+void LaunchApp();
+void output_frame();
 void listenForBullets();
 void out_pixel(uint8_t xpos, uint8_t ypos,  uint8_t red, uint8_t green, uint8_t blue  );
 void add_rectangle(int color, uint8_t x_start,uint8_t x_end, uint8_t y_start ,uint8_t y_end);

@@ -175,7 +175,7 @@ void display_arena(){
 //     LM_Text(5,19,7,0X00990099);
 //     LM_Text(1,25,8,0X00FFFFFF);
 //     LM_Text(5,25,9,0X00FF6666);
-     //add_rectangle( 0x00000f00, line_x_start, line_x_end, line_y_start, line_end);
+     add_rectangle( 0x00000f00, line_x_start, line_x_end, line_y_start, line_end);
 
 
 
@@ -185,7 +185,7 @@ void display_arena(){
 
         //G8RTOS_WaitSemaphore(&scoreSem);
 
-        //writeScore(scoreValue, 0x00ff0000);
+        writeScore(scoreValue, 0x00ff0000);
         //G8RTOS_SignalSemaphore(&scoreSem);
         G8RTOS_OS_Sleep(55);
 
@@ -428,12 +428,12 @@ void moveGlagaShip(){
     while(1){
 
 
-        G8RTOS_WaitSemaphore(&XpData);
+        //G8RTOS_WaitSemaphore(&XpData);
 
 
         byte = RXDataL;
 
-        G8RTOS_SignalSemaphore(&XpData);
+       // G8RTOS_SignalSemaphore(&XpData);
 
         if ( get_bit(1, byte) == 0x01) galagaShips_starX++;
         if (galagaShips_starX >=52) galagaShips_starX = 52;
@@ -450,7 +450,7 @@ void moveGlagaShip(){
         galagaShips_starY_prev = galagaShips_starY;
         galagaShips_starX_prev = galagaShips_starX;
 
-        G8RTOS_OS_Sleep(40);
+        G8RTOS_OS_Sleep(41);
     }
 
 }
@@ -839,3 +839,109 @@ void enemies_updater(){
 
 
 }
+
+void LaunchApp() {
+
+
+    out_image(logo, 1, 1, 62, 62);
+    add_rectangle(0, 38, 39, 33, 37);
+   // add_rectangle(0x00ff00ff, 0,63, 0, 63);
+
+     G8RTOS_OS_Sleep(2500);
+
+     add_rectangle(0, 0,63,0, 63);
+  //   G8RTOS_OS_Sleep(1500);
+
+    G8RTOS_AddThread(&display_arena, "Arena", 1);
+     G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+     //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+         G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
+        // G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
+        // G8RTOS_AddThread(&output_frame, "outputFrame", 1);
+       //  G8RTOS_AddThread(&writeLogo, "logo", 1);
+         G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
+         G8RTOS_AddThread(&displayBackground, "Background", 1);
+
+         G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+
+
+    G8RTOS_KillSelf();
+              while(1);
+
+}
+
+
+void output_frame(){
+
+    int i =0;
+
+    while(1){
+
+
+
+       P6->OUT &= 0b11110000;
+
+
+        if (i == 0){
+            P4->OUT  = 0x01;
+            P5->OUT= 0;
+            P3->OUT =0;
+        }
+        else{
+
+          P4->OUT = bufferGreen[i];
+        P5->OUT = bufferBlue[i];
+        P3->OUT = bufferRed[i];
+
+
+        }
+
+        P6->OUT |= 0b00001011;
+
+        i++;
+      //  P9->OUT = 0b00000000;
+
+
+
+
+
+         if (i == 4096){
+             i = 0;
+
+           //  P9->OUT = 0b00000000;
+                   //  P4->OUT = 0x01;
+                 //  P5->OUT = 00;
+                 //  P3->OUT = 00;
+                  // P9->OUT = 0b00001011;
+
+
+
+
+//             bufferGreen[0]=01;
+//             bufferBlue[0]=00;
+//             bufferRed[0]=00;
+
+ //            for (int g = 0 ; g < 4096 ;g++){
+ //            bufferBlue[g] = 0;
+ //            bufferGreen[g] = 0;
+ //            bufferRed[g] = 0;
+ //            }
+
+            // bufferGreen[0]=01;
+            // bufferBlue[0]=00;
+            // bufferRed[0]=00;
+ //            bufferBlue[1]=00;
+ //            bufferBlue[2]=00;
+ //            bufferBlue[3]=00;
+ //            bufferBlue[4]=00;
+ //            bufferRed[5]=00;
+         }
+
+      //  G8RTOS_OS_Sleep(1);
+
+    }
+
+
+
+}
+

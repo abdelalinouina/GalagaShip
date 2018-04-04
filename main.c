@@ -28,7 +28,7 @@ void initUARTP3();
 uint16_t i = 0;
 uint8_t byte = 0;
 int16_t tempx, tempy;
-void output_frame();
+
 uint8_t x_cord, y_cord;
 int x_pos, y_pos;
 int  x_end = 48;
@@ -223,16 +223,20 @@ void main(void)
   ButtonsInit();
     initUART();
 
-    G8RTOS_InitSemaphore(&XpData, 1);
+ //   G8RTOS_InitSemaphore(&XpData, 1);
 
 
 
        G8RTOS_AddThread(&IdleThread, "idle", 255);
-       G8RTOS_AddThread(&display_arena, "Arena", 1);
-       G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
-       G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
+      // G8RTOS_AddThread(&display_arena, "Arena", 1);
+       G8RTOS_AddThread(&LaunchApp, "LaunchApp", 1);
        G8RTOS_AddThread(&output_frame, "outputFrame", 1);
-       G8RTOS_AddThread(&writeLogo, "logo", 1);
+
+
+       //G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
+      // G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
+      // G8RTOS_AddThread(&output_frame, "outputFrame", 1);
+     //  G8RTOS_AddThread(&writeLogo, "logo", 1);
        //G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
        //G8RTOS_AddThread(&displayBackground, "Background", 1);
        //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
@@ -662,80 +666,6 @@ void initUART()
 
     /* Enable UART module */
     MAP_UART_enableModule(EUSCI_A3_BASE);
-}
-
-void output_frame(){
-
-    int i =0;
-
-    while(1){
-
-
-
-       P6->OUT &= 0b11110000;
-
-
-        if (i == 0){
-            P4->OUT  = 0x01;
-            P5->OUT= 0;
-            P3->OUT =0;
-        }
-        else{
-
-          P4->OUT = bufferGreen[i];
-        P5->OUT = bufferBlue[i];
-        P3->OUT = bufferRed[i];
-
-
-        }
-
-        P6->OUT |= 0b00001011;
-
-        i++;
-      //  P9->OUT = 0b00000000;
-
-
-
-
-
-         if (i == 4096){
-             i = 0;
-
-           //  P9->OUT = 0b00000000;
-                   //  P4->OUT = 0x01;
-                 //  P5->OUT = 00;
-                 //  P3->OUT = 00;
-                  // P9->OUT = 0b00001011;
-
-
-
-
-//             bufferGreen[0]=01;
-//             bufferBlue[0]=00;
-//             bufferRed[0]=00;
-
- //            for (int g = 0 ; g < 4096 ;g++){
- //            bufferBlue[g] = 0;
- //            bufferGreen[g] = 0;
- //            bufferRed[g] = 0;
- //            }
-
-            // bufferGreen[0]=01;
-            // bufferBlue[0]=00;
-            // bufferRed[0]=00;
- //            bufferBlue[1]=00;
- //            bufferBlue[2]=00;
- //            bufferBlue[3]=00;
- //            bufferBlue[4]=00;
- //            bufferRed[5]=00;
-         }
-
-      //  G8RTOS_OS_Sleep(1);
-
-    }
-
-
-
 }
 
 
