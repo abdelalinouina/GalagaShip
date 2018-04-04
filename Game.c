@@ -212,10 +212,10 @@ void writeScore(uint8_t score, int color)
 
 void writeLogo()
 {
-
+    out_image(&logo, 1, 1, 62, 62);
+    add_rectangle(0, 38, 39, 33, 37);
     while(1)
     {
-        out_image(&logo, 1, 1, 62, 62);
         G8RTOS_OS_Sleep(100);
     }
 }
