@@ -24,6 +24,7 @@ void out_image(uint32_t* image, uint8_t Xpos, uint8_t Ypos, uint8_t whidth, uint
 void displayBackground();
 uint8_t get_bit(uint8_t shift, uint8_t byte);
 void ButtonsInit();
+void writeLogo();
 void moveGlagaShip();
 void ReceiveUART();
 void ReceiveUART2();

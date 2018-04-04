@@ -74,7 +74,6 @@ const uint32_t cube15[1024] ={    0,    0,    0,    0,    0,    0,    0,    0,  
 
 
 
-
 volatile uint8_t RXData = 0;
 uint8_t tempRX;
 volatile uint16_t adcResult;
@@ -233,12 +232,11 @@ void main(void)
        G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
        G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
        G8RTOS_AddThread(&output_frame, "outputFrame", 1);
-       G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
-       G8RTOS_AddThread(&displayBackground, "Background", 1);
-
-
-      G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-       G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+       G8RTOS_AddThread(&writeLogo, "logo", 1);
+       //G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
+       //G8RTOS_AddThread(&displayBackground, "Background", 1);
+       //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+       //G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
 
 
       // bufferGreen[0] = 0x01;
