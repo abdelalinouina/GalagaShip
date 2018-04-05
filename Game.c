@@ -89,12 +89,12 @@ uint8_t letterI[3] = {0x11, 0x1f, 0x11};
 uint8_t letterJ[3] = {0x12, 0x1f, 0x10};
 uint8_t letterK[3] = {0x1f, 0x04, 0x1b};
 uint8_t letterL[3] = {0x1f, 0x01, 0x01};
-uint8_t letterN[3] = {0x1f, 0x10, 0x1f};
+uint8_t letterN[3] = {0x0f, 0x10, 0x0f};
 uint8_t letterO[3] = {0x0e, 0x11, 0x0e};
 uint8_t letterP[3] = {0x1f, 0x14, 0x08};
 uint8_t letterQ[3] = {0x0e, 0x12, 0x0d};
 uint8_t letterR[3] = {0x1f, 0x14, 0x0b};
-uint8_t letterS[3] = {0x1d, 0x15, 0x17};
+uint8_t letterS[3] = {0x09, 0x15, 0x12};
 uint8_t letterT[3] = {0x10, 0x1f, 0x10};
 uint8_t letterU[3] = {0x1f, 0x01, 0x1f};
 uint8_t letterV[3] = {0x1e, 0x01, 0x1e};
@@ -210,7 +210,7 @@ void display_arena(){
 
         //G8RTOS_WaitSemaphore(&scoreSem);
 
-        //writeScore(scoreValue, 0x00ff0000);
+        writeScore(scoreValue, 0x00ff0000);
         //G8RTOS_SignalSemaphore(&scoreSem);
         G8RTOS_OS_Sleep(55);
 
@@ -399,9 +399,9 @@ void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor)
 
             if (tempAscii[Index]>> (7 - shift) & 0x01 == 0x01 ){
 
-                bufferBlue[i+(j*64)] = charColor  & 0x5F;
-                bufferGreen[i+(j*64)] =( charColor >> 8 ) & 0x5F;
-                bufferRed[i+(j*64)] =(charColor >> 16 ) &0x5F;
+                bufferBlue[i+(j*64)] = charColor  & 0x7F;
+                bufferGreen[i+(j*64)] =( charColor >> 8 ) & 0x7F;
+                bufferRed[i+(j*64)] =(charColor >> 16 ) &0x7F;
 
             }
             shift++;
@@ -963,41 +963,50 @@ void enemies_updater(){
 void LaunchApp() {
 
 
-    out_image(logo, 1, 1, 62, 62);
-    add_rectangle(0, 38, 39, 33, 37);
-   // add_rectangle(0x00ff00ff, 0,63, 0, 63);
+     out_image(logo, 1, 1, 62, 62);
+     add_rectangle(0, 38, 39, 33, 37);
 
      G8RTOS_OS_Sleep(2500);
 
+     add_rectangle(0, 0,63,0, 63);
+     outString("galaga", 25, 25, 0x00ff0000);
+
+     G8RTOS_OS_Sleep(2500);
 
      add_rectangle(0, 0,63,0, 63);
-     LM_Text(2,9,10,0X00FF0000);
-     LM_Text(6,9,11,0X00FF9933);
-     LM_Text(2,15,12,0X00FFFF00);
-     LM_Text(6,15,13,0X0080FF00);
-     LM_Text(2,21,14,0X0000FFFF);
-     LM_Text(6,21,15,0X000000FF);
-     LM_Text(2,27,16,0X00FF0000);
-     LM_Text(6,27,17,0X00FF9933);
-     LM_Text(2,33,18,0X00FFFF00);
-     LM_Text(6,33,19,0X0080FF00);
-     LM_Text(2,39,20,0X0000FFFF);
-     LM_Text(6,39,21,0X000000FF);
-     LM_Text(2,45,28,0X00FFFF00);
-     LM_Text(6,45,29,0X0080FF00);
-     LM_Text(2,51,30,0X0000FFFF);
-     LM_Text(6,51,31,0X000000FF);
-     LM_Text(2,57,32,0X00FFFF00);
-     LM_Text(6,57,33,0X0080FF00);
+
+     //outString("abcdef", 10, 10, 0x00ff00ff);
+     //outString("ghijkl", 10, 16, 0x00ff00ff);
+     //outString("nopqrs", 10, 22, 0x00ff00ff);
+     //outString("tuvxyz", 10, 28, 0x00ff00ff);
+
+//     LM_Text(2,9,10,0X00FF0000);
+//     LM_Text(6,9,11,0X00FF9933);
+//     LM_Text(2,15,12,0X00FFFF00);
+//     LM_Text(6,15,13,0X0080FF00);
+//     LM_Text(2,21,14,0X0000FFFF);
+//     LM_Text(6,21,15,0X000000FF);
+//     LM_Text(2,27,16,0X00FF0000);
+//     LM_Text(6,27,17,0X00FF9933);
+//     LM_Text(2,33,18,0X00FFFF00);
+//     LM_Text(6,33,19,0X0080FF00);
+//     LM_Text(2,39,20,0X0000FFFF);
+//     LM_Text(6,39,21,0X000000FF);
+//     LM_Text(2,45,28,0X00FFFF00);
+//     LM_Text(6,45,29,0X0080FF00);
+//     LM_Text(2,51,30,0X0000FFFF);
+//     LM_Text(6,51,31,0X000000FF);
+//     LM_Text(2,57,32,0X00FFFF00);
+//     LM_Text(6,57,33,0X0080FF00);
 
   //   G8RTOS_OS_Sleep(1500);
 
     G8RTOS_AddThread(&display_arena, "Arena", 1);
-     G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
      //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-         G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
-        // G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
-        // G8RTOS_AddThread(&output_frame, "outputFrame", 1);
+     G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+        G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
+        G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
+       // G8RTOS_AddThread(&output_frame, "outputFrame", 1);
        //  G8RTOS_AddThread(&writeLogo, "logo", 1);
          G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
          G8RTOS_AddThread(&displayBackground, "Background", 1);
@@ -1010,6 +1019,47 @@ void LaunchApp() {
 
 }
 
+static uint8_t getAscii(char letter)
+{
+    if(letter == 'a' || letter == 'A') return 10;
+    else if(letter == 'b' || letter == 'B') return 11;
+    else if(letter == 'c' || letter == 'C') return 12;
+    else if(letter == 'd' || letter == 'D') return 13;
+    else if(letter == 'e' || letter == 'E') return 14;
+    else if(letter == 'f' || letter == 'F') return 15;
+    else if(letter == 'g' || letter == 'G') return 16;
+    else if(letter == 'h' || letter == 'H') return 17;
+    else if(letter == 'i' || letter == 'I') return 18;
+    else if(letter == 'j' || letter == 'J') return 19;
+    else if(letter == 'k' || letter == 'K') return 20;
+    else if(letter == 'l' || letter == 'L') return 21;
+    else if(letter == 'n' || letter == 'N') return 22;
+    else if(letter == 'o' || letter == 'O') return 23;
+    else if(letter == 'p' || letter == 'P') return 24;
+    else if(letter == 'q' || letter == 'Q') return 25;
+    else if(letter == 'r' || letter == 'R') return 26;
+    else if(letter == 's' || letter == 'S') return 27;
+    else if(letter == 't' || letter == 'T') return 28;
+    else if(letter == 'u' || letter == 'U') return 29;
+    else if(letter == 'v' || letter == 'V') return 30;
+    else if(letter == 'x' || letter == 'X') return 31;
+    else if(letter == 'y' || letter == 'Y') return 32;
+    else if(letter == 'z' || letter == 'Z') return 33;
+}
+
+void outString(char *string, uint16_t Xpos, uint16_t Ypos, uint32_t charColor)
+{
+    char temp;
+    uint8_t ascii;
+    while(*string != 0)     //while not the null character
+    {
+        temp = *string;
+        ascii = getAscii(temp);
+        LM_Text(Xpos, Ypos, ascii, charColor);
+        Xpos += 4;
+        *string++;
+    }
+}
 
 void output_frame(){
 

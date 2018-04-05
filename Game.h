@@ -19,6 +19,7 @@ semaphore_t XpData;
 extern uint8_t scoreValue;
 
 void writeScore(uint8_t score, int color);
+void outString(char *string, uint16_t Xpos, uint16_t Ypos, uint32_t charColor);
 void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor);
 void out_image(uint32_t* image, uint8_t Xpos, uint8_t Ypos, uint8_t whidth, uint8_t hight);
 void displayBackground();
