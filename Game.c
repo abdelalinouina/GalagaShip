@@ -65,16 +65,43 @@ volatile uint8_t RXDataL, RXDataL_temp = 0;
 #define MAX_stars 15
 uint8_t life_bugs =0;
 static star_t stars_table[MAX_stars];
-uint8_t Zero[3]= {0x1F,0x11,0x1F};
-uint8_t One[8]= {0,0,0x1F};
-uint8_t Two[8]= {0x17,0x15,0x1d};
+
+uint8_t Zero[3] = {0x1F,0x11,0x1F};
+uint8_t One[8]  = {0x00,0x00,0x1F};
+uint8_t Two[8]  = {0x17,0x15,0x1d};
 uint8_t Three[8]= {0x15,0x15,0x1F};
-uint8_t Four[8]= {0x1C, 0x04,0x1F};
-uint8_t Five[8]= {0x1d,0x15,0x17};
-uint8_t Six[8]= {0x1F,0x15,0x17};
+uint8_t Four[8] = {0x1C,0x04,0x1F};
+uint8_t Five[8] = {0x1d,0x15,0x17};
+uint8_t Six[8]  = {0x1F,0x15,0x17};
 uint8_t Seven[8]= {0x10,0x10,0x1F};
 uint8_t Eight[8]= {0x1F,0x15,0x1F};
-uint8_t Nine[8]= {0x1D,0x15,0x1F};
+uint8_t Nine[8] = {0x1D,0x15,0x1F};
+
+uint8_t letterA[3] = {0x0f, 0x14, 0x0f};
+uint8_t letterB[3] = {0x1f, 0x15, 0x0a};
+uint8_t letterC[3] = {0x0e, 0x11, 0x11};
+uint8_t letterD[3] = {0x1f, 0x11, 0x0e};
+uint8_t letterE[3] = {0x1f, 0x15, 0x15};
+uint8_t letterF[3] = {0x1f, 0x14, 0x14};
+uint8_t letterG[3] = {0x0e, 0x11, 0x16};
+uint8_t letterH[3] = {0x1f, 0x04, 0x1f};
+uint8_t letterI[3] = {0x11, 0x1f, 0x11};
+uint8_t letterJ[3] = {0x12, 0x1f, 0x10};
+uint8_t letterK[3] = {0x1f, 0x04, 0x1b};
+uint8_t letterL[3] = {0x1f, 0x01, 0x01};
+uint8_t letterN[3] = {0x1f, 0x10, 0x1f};
+uint8_t letterO[3] = {0x0e, 0x11, 0x0e};
+uint8_t letterP[3] = {0x1f, 0x14, 0x08};
+uint8_t letterQ[3] = {0x0e, 0x12, 0x0d};
+uint8_t letterR[3] = {0x1f, 0x14, 0x0b};
+uint8_t letterS[3] = {0x1d, 0x15, 0x17};
+uint8_t letterT[3] = {0x10, 0x1f, 0x10};
+uint8_t letterU[3] = {0x1f, 0x01, 0x1f};
+uint8_t letterV[3] = {0x1e, 0x01, 0x1e};
+uint8_t letterX[3] = {0x1b, 0x04, 0x1b};
+uint8_t letterY[3] = {0x18, 0x07, 0x18};
+uint8_t letterZ[3] = {0x13, 0x15, 0x19};
+
 uint8_t path_X[100] = {64,63,62,62,61,60,59,58,58,57,55,54,54,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,34,33,33,32,32,31,31,30,30,30,29,29,28,28};
 uint8_t path_Y[100] = {35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,41,41,42,42,43,43,43,43,43,44,43,43,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25};
 int8_t galagaShips_starY = 50;
@@ -165,16 +192,14 @@ void display_arena(){
 //      out_image(GreenBug, 24, 41, 5,5);
 //      out_image(GreenBug, 24, 48, 5,5);
 
-//     LM_Text(1,1,0,0X00FF0000);
-//     LM_Text(5,1,1,0X00FF9933);
-//     LM_Text(1,7,2,0X00FFFF00);
-//     LM_Text(5,7,3,0X0080FF00);
-//     LM_Text(1,13,4,0X0000FFFF);
-//     LM_Text(5,13,5,0X000000FF);
+
 //     LM_Text(1,19,6,0X000000FF);
 //     LM_Text(5,19,7,0X00990099);
 //     LM_Text(1,25,8,0X00FFFFFF);
 //     LM_Text(5,25,9,0X00FF6666);
+
+
+
      add_rectangle( 0x00000f00, line_x_start, line_x_end, line_y_start, line_end);
 
 
@@ -185,7 +210,7 @@ void display_arena(){
 
         //G8RTOS_WaitSemaphore(&scoreSem);
 
-        writeScore(scoreValue, 0x00ff0000);
+        //writeScore(scoreValue, 0x00ff0000);
         //G8RTOS_SignalSemaphore(&scoreSem);
         G8RTOS_OS_Sleep(55);
 
@@ -266,7 +291,102 @@ void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor)
 
         tempAscii = Nine;
         break;
+    case 10:
 
+        tempAscii = letterA;
+        break;
+    case 11:
+
+        tempAscii = letterB;
+        break;
+    case 12:
+
+        tempAscii = letterC;
+        break;
+    case 13:
+
+        tempAscii = letterD;
+        break;
+    case 14:
+
+        tempAscii = letterE;
+        break;
+    case 15:
+
+        tempAscii = letterF;
+        break;
+    case 16:
+
+        tempAscii = letterG;
+        break;
+    case 17:
+
+        tempAscii = letterH;
+        break;
+    case 18:
+
+        tempAscii = letterI;
+        break;
+    case 19:
+
+        tempAscii = letterJ;
+        break;
+    case 20:
+
+        tempAscii = letterK;
+        break;
+    case 21:
+
+        tempAscii = letterL;
+        break;
+    case 22:
+
+        tempAscii = letterN;
+        break;
+    case 23:
+
+        tempAscii = letterO;
+        break;
+    case 24:
+
+        tempAscii = letterP;
+        break;
+    case 25:
+
+        tempAscii = letterQ;
+        break;
+    case 26:
+
+        tempAscii = letterR;
+        break;
+    case 27:
+
+        tempAscii = letterS;
+        break;
+    case 28:
+
+        tempAscii = letterT;
+        break;
+    case 29:
+
+        tempAscii = letterU;
+        break;
+    case 30:
+
+        tempAscii = letterV;
+        break;
+    case 31:
+
+        tempAscii = letterX;
+        break;
+    case 32:
+
+        tempAscii = letterY;
+        break;
+    case 33:
+
+        tempAscii = letterZ;
+        break;
     }
 
     int Index = 0;
@@ -279,9 +399,9 @@ void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor)
 
             if (tempAscii[Index]>> (7 - shift) & 0x01 == 0x01 ){
 
-                bufferBlue[i+(j*64)] = charColor  & 0xFF;
-                bufferGreen[i+(j*64)] =( charColor >> 8 ) & 0xFF;
-                bufferRed[i+(j*64)] =(charColor >> 16 ) &0xFF;
+                bufferBlue[i+(j*64)] = charColor  & 0x5F;
+                bufferGreen[i+(j*64)] =( charColor >> 8 ) & 0x5F;
+                bufferRed[i+(j*64)] =(charColor >> 16 ) &0x5F;
 
             }
             shift++;
@@ -849,7 +969,27 @@ void LaunchApp() {
 
      G8RTOS_OS_Sleep(2500);
 
+
      add_rectangle(0, 0,63,0, 63);
+     LM_Text(2,9,10,0X00FF0000);
+     LM_Text(6,9,11,0X00FF9933);
+     LM_Text(2,15,12,0X00FFFF00);
+     LM_Text(6,15,13,0X0080FF00);
+     LM_Text(2,21,14,0X0000FFFF);
+     LM_Text(6,21,15,0X000000FF);
+     LM_Text(2,27,16,0X00FF0000);
+     LM_Text(6,27,17,0X00FF9933);
+     LM_Text(2,33,18,0X00FFFF00);
+     LM_Text(6,33,19,0X0080FF00);
+     LM_Text(2,39,20,0X0000FFFF);
+     LM_Text(6,39,21,0X000000FF);
+     LM_Text(2,45,28,0X00FFFF00);
+     LM_Text(6,45,29,0X0080FF00);
+     LM_Text(2,51,30,0X0000FFFF);
+     LM_Text(6,51,31,0X000000FF);
+     LM_Text(2,57,32,0X00FFFF00);
+     LM_Text(6,57,33,0X0080FF00);
+
   //   G8RTOS_OS_Sleep(1500);
 
     G8RTOS_AddThread(&display_arena, "Arena", 1);
