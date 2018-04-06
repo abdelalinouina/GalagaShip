@@ -525,7 +525,7 @@ void  ReceiveUART_Pi()
 
         RXData_Pi = MAP_UART_receiveData(EUSCI_A1_BASE);
 
-      //  while(UCA3STATW & UCBUSY);
+        while(UCA3STATW & UCBUSY);
        //// if (((RXDataL & 0b00010000) == 0b00010000 || (RXDataL & 0b00100000) == 0b00100000 ) && bullet_flag == 0 ){
        //     bullet_flag = 1;
         //}
