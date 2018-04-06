@@ -20,9 +20,8 @@ int  LED_rectangle(int x_start, int x_end, int y_start, int y_end, uint32_t* ima
 void moveRectangle();
 void updadeBuffer();
 void alternateCube();
-void initUART();
+
 void display_arena();
-void initUARTP3();
 
 
 uint16_t i = 0;
@@ -78,24 +77,13 @@ volatile uint8_t RXData = 0;
 uint8_t tempRX;
 volatile uint16_t adcResult;
 
-const eUSCI_UART_Config uartConfig =
-{
-     EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source 12MHz
-     78,                                      // BRDIV = 78
-     2,                                       // UCxBRF = 2
-     0,                                       // UCxBRS = 0
-     EUSCI_A_UART_NO_PARITY,                  // No Parity
-     EUSCI_A_UART_LSB_FIRST,                  // LSB First
-     EUSCI_A_UART_ONE_STOP_BIT,               // One stop bit
-     EUSCI_A_UART_MODE,                       // UART mode
-     EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION  // Oversampling
-};
+
 
 
 void main(void)
 {
 
-
+//
 //    MAP_WDT_A_holdTimer();
 //
 //    G8RTOS_Init();
@@ -194,6 +182,8 @@ void main(void)
 //               byte = byte & 0b11101111;
 //           }
 //
+//           byte = byte | 0b10000000;
+//
 //           MAP_UART_transmitData(EUSCI_A2_BASE, byte);
 //
 //           //transmitSPI(i);
@@ -221,7 +211,8 @@ void main(void)
     BSP_InitBoard();
   G8RTOS_Init();
   ButtonsInit();
-    initUART();
+    initUART_XBee();
+    initUARTP3();
 
  //   G8RTOS_InitSemaphore(&XpData, 1);
 
@@ -655,31 +646,3 @@ void updadeBuffer() {
 
 
 
-void initUART()
-{
-    /* Selecting P9.6 and P9.7 in UART mode */
-    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P9,
-            GPIO_PIN5 | GPIO_PIN6 | GPIO_PIN7, GPIO_PRIMARY_MODULE_FUNCTION);
-
-    /* Configuring UART Module */
-    MAP_UART_initModule(EUSCI_A3_BASE, &uartConfig);
-
-    /* Enable UART module */
-    MAP_UART_enableModule(EUSCI_A3_BASE);
-}
-
-
-
-
-void initUARTP3()
-{
-    /* Selecting P3.2 and P3.3 in UART mode */
-    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P3,
-            GPIO_PIN1 | GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
-
-    /* Configuring UART Module */
-    MAP_UART_initModule(EUSCI_A2_BASE, &uartConfig);
-
-    /* Enable UART module */
-    MAP_UART_enableModule(EUSCI_A2_BASE);
-}

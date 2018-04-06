@@ -17,6 +17,7 @@ uint32_t buffer[4097];
 uint8_t newFrame ;
 semaphore_t XpData;
 extern uint8_t scoreValue;
+uint8_t RXData_Pi;
 
 void writeScore(uint8_t score, int color);
 void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor);
@@ -26,11 +27,13 @@ uint8_t get_bit(uint8_t shift, uint8_t byte);
 void ButtonsInit();
 void writeLogo();
 void moveGlagaShip();
-void ReceiveUART();
-void ReceiveUART2();
+void initUART_XBee();
+void ReceiveUART_Pi();
 void move_bullet();
 void IdleThread();
 void LaunchApp();
+void initUARTP3();
+void initUART_XBee();
 void output_frame();
 void listenForBullets();
 void out_pixel(uint8_t xpos, uint8_t ypos,  uint8_t red, uint8_t green, uint8_t blue  );
@@ -41,5 +44,7 @@ void add_greenBugs();
 void  check_bullet_collision(uint8_t xpos, uint8_t ypos );
 void out_exposion(uint8_t xpos, uint8_t ypos);
 void enemies_updater();
+
+
 
 #endif /* GAME_H_ */

@@ -82,6 +82,19 @@ int8_t galagaShips_starX = 35;
 uint8_t to_be_deleted_x, to_be_deleted_y;
 int8_t galagaShips_starY_prev, galagaShips_starX_prev ;
 
+const eUSCI_UART_Config uartConfig =
+{
+     EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source 12MHz
+     78,                                      // BRDIV = 78
+     2,                                       // UCxBRF = 2
+     0,                                       // UCxBRS = 0
+     EUSCI_A_UART_NO_PARITY,                  // No Parity
+     EUSCI_A_UART_LSB_FIRST,                  // LSB First
+     EUSCI_A_UART_ONE_STOP_BIT,               // One stop bit
+     EUSCI_A_UART_MODE,                       // UART mode
+     EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION  // Oversampling
+};
+
 uint32_t GalagaShip[72]= {     0,0,0,0,0X00FF6666,0,0,0,0,
                                0,0,0,0,0X00FF6666,0,0,0,0,
                                0,0,0,0x000000FF,0X00FF6666,0x000000FF,0,0,0,
@@ -137,7 +150,7 @@ void ButtonsInit()
     P4->DIR = 0xFF;
     P5->DIR = 0xFF;
     P6->DIR |= 0b00000001;
-    //P2->DIR = 0;
+    P2->DIR = 0;
     //P6->SEL0 =0;
     //P6->DIR = 0b11111111;
 }
@@ -473,7 +486,7 @@ void   ReceiveUART2(){
 }
 
 
-void  ReceiveUART()
+void  ReceiveUART_XBee()
 {
     //    while(UCA3STATW & UCBUSY);
     //    RXDataH = MAP_UART_receiveData(EUSCI_A3_BASE);
@@ -496,6 +509,34 @@ void  ReceiveUART()
         G8RTOS_OS_Sleep(89);
     }
 }
+
+
+
+
+void  ReceiveUART_Pi()
+{
+    //    while(UCA3STATW & UCBUSY);
+    //    RXDataH = MAP_UART_receiveData(EUSCI_A3_BASE);
+    while(1){
+
+        //  G8RTOS_WaitSemaphore(&XpData);
+// int i;
+// i++;
+
+        RXData_Pi = MAP_UART_receiveData(EUSCI_A1_BASE);
+
+      //  while(UCA3STATW & UCBUSY);
+       //// if (((RXDataL & 0b00010000) == 0b00010000 || (RXDataL & 0b00100000) == 0b00100000 ) && bullet_flag == 0 ){
+       //     bullet_flag = 1;
+        //}
+        //  G8RTOS_SignalSemaphore(&XpData);
+
+        // return RXDataL;
+
+        G8RTOS_OS_Sleep(89);
+    }
+}
+
 
 
 void add_rectangle(int color, uint8_t x_start,uint8_t x_end, uint8_t y_start ,uint8_t y_end){
@@ -665,7 +706,7 @@ void move_greenBug() {
         //out_image(GreenBug, bugs_table[i].xpos, bugs_table[i].ypos, 5,5);
         if (isEntring == 1){
 
-            bugs_table[i].ypos =  path_Y[path_index]-5;
+            bugs_table[i].ypos =  44 - (path_Y[path_index]-5);
             bugs_table[i].xpos =  path_X[path_index]-5;
 
             add_rectangle(0, prev_xpos, prev_xpos+5, prev_ypos, prev_ypos+5);
@@ -855,7 +896,8 @@ void LaunchApp() {
     G8RTOS_AddThread(&display_arena, "Arena", 1);
      G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
      //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-         G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
+         G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
+         G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
         // G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
         // G8RTOS_AddThread(&output_frame, "outputFrame", 1);
        //  G8RTOS_AddThread(&writeLogo, "logo", 1);
@@ -944,4 +986,37 @@ void output_frame(){
 
 
 }
+
+
+void initUART_XBee()
+{
+    /* Selecting P9.6 and P9.7 in UART mode */
+    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P9,
+            GPIO_PIN5 | GPIO_PIN6 | GPIO_PIN7, GPIO_PRIMARY_MODULE_FUNCTION);
+
+    /* Configuring UART Module */
+    MAP_UART_initModule(EUSCI_A3_BASE, &uartConfig);
+
+    /* Enable UART module */
+    MAP_UART_enableModule(EUSCI_A3_BASE);
+}
+
+
+
+
+
+
+void initUARTP3()
+{
+    /* Selecting P2.2 and P2.3 in UART mode */
+    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P2,
+            GPIO_PIN1 | GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
+
+    /* Configuring UART Module */
+    MAP_UART_initModule(EUSCI_A1_BASE, &uartConfig);
+
+    /* Enable UART module */
+    MAP_UART_enableModule(EUSCI_A1_BASE);
+}
+
 
