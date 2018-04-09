@@ -20,6 +20,7 @@ extern uint8_t scoreValue;
 uint8_t RXData_Pi;
 
 void writeScore(uint8_t score, int color);
+void menu();
 void outString(char *string, uint16_t Xpos, uint16_t Ypos, uint32_t charColor);
 void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor);
 void out_image(uint32_t* image, uint8_t Xpos, uint8_t Ypos, uint8_t whidth, uint8_t hight);
@@ -30,6 +31,7 @@ void writeLogo();
 void moveGlagaShip();
 void initUART_XBee();
 void ReceiveUART_Pi();
+void  ReceiveUART_XBee();
 void move_bullet();
 void IdleThread();
 void LaunchApp();
@@ -46,6 +48,6 @@ void  check_bullet_collision(uint8_t xpos, uint8_t ypos );
 void out_exposion(uint8_t xpos, uint8_t ypos);
 void enemies_updater();
 
-
+void menuListener();
 
 #endif /* GAME_H_ */

@@ -61,6 +61,8 @@ typedef struct green_bug green_bug_t;
 uint8_t scoreValue = 0;
 static green_bug_t bugs_table[numOfBugs];
 uint8_t bullet_flag = 0;
+uint8_t menuselect_flag = 0;
+uint8_t menuItem = 0;
 volatile uint8_t RXDataL, RXDataL_temp = 0;
 #define MAX_stars 15
 uint8_t life_bugs =0;
@@ -101,6 +103,9 @@ uint8_t letterV[3] = {0x1e, 0x01, 0x1e};
 uint8_t letterX[3] = {0x1b, 0x04, 0x1b};
 uint8_t letterY[3] = {0x18, 0x07, 0x18};
 uint8_t letterZ[3] = {0x13, 0x15, 0x19};
+
+uint8_t blankSpace[3]  = {0x00, 0x00, 0x00};
+uint8_t menuPointer[3] = {0x1f, 0x0e, 0x04};
 
 uint8_t path_X[100] = {64,63,62,62,61,60,59,58,58,57,55,54,54,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,34,33,33,32,32,31,31,30,30,30,29,29,28,28};
 uint8_t path_Y[100] = {35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,41,41,42,42,43,43,43,43,43,44,43,43,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25};
@@ -168,18 +173,18 @@ void IdleThread()
 
 void ButtonsInit()
 {
+    P1->SEL0 = 0;
     P3->SEL0 = 0;
     P4->SEL0 = 0;
     P5->SEL0 = 0;
     P6->SEL0 = 0;
 
+    P1->DIR |= 0x60;
     P3->DIR = 0xFF;
     P4->DIR = 0xFF;
     P5->DIR = 0xFF;
     P6->DIR |= 0b00000001;
     P2->DIR = 0;
-    //P6->SEL0 =0;
-    //P6->DIR = 0b11111111;
 }
 
 void display_arena(){
@@ -225,7 +230,7 @@ void display_arena(){
 
         //G8RTOS_WaitSemaphore(&scoreSem);
 
-        writeScore(scoreValue, 0x00ff0000);
+        writeScore(scoreValue, 0x00ffffff);
         //G8RTOS_SignalSemaphore(&scoreSem);
         G8RTOS_OS_Sleep(55);
 
@@ -238,7 +243,7 @@ void writeScore(uint8_t score, int color)
     add_rectangle(0, 0, 9, 49, 56);
     if(score < 10)
     {
-        LM_Text(2, 50, score, color);
+        LM_Text(6, 50, score, color);
     }
     else
     {
@@ -257,6 +262,57 @@ void writeLogo()
     while(1)
     {
         G8RTOS_OS_Sleep(100);
+    }
+}
+
+static uint8_t getAscii(char letter)
+{
+    if(letter == 'a' || letter == 'A') return 10;
+    else if(letter == 'b' || letter == 'B') return 11;
+    else if(letter == 'c' || letter == 'C') return 12;
+    else if(letter == 'd' || letter == 'D') return 13;
+    else if(letter == 'e' || letter == 'E') return 14;
+    else if(letter == 'f' || letter == 'F') return 15;
+    else if(letter == 'g' || letter == 'G') return 16;
+    else if(letter == 'h' || letter == 'H') return 17;
+    else if(letter == 'i' || letter == 'I') return 18;
+    else if(letter == 'j' || letter == 'J') return 19;
+    else if(letter == 'k' || letter == 'K') return 20;
+    else if(letter == 'l' || letter == 'L') return 21;
+    else if(letter == 'n' || letter == 'N') return 22;
+    else if(letter == 'o' || letter == 'O') return 23;
+    else if(letter == 'p' || letter == 'P') return 24;
+    else if(letter == 'q' || letter == 'Q') return 25;
+    else if(letter == 'r' || letter == 'R') return 26;
+    else if(letter == 's' || letter == 'S') return 27;
+    else if(letter == 't' || letter == 'T') return 28;
+    else if(letter == 'u' || letter == 'U') return 29;
+    else if(letter == 'v' || letter == 'V') return 30;
+    else if(letter == 'x' || letter == 'X') return 31;
+    else if(letter == 'y' || letter == 'Y') return 32;
+    else if(letter == 'z' || letter == 'Z') return 33;
+    else if(letter == ' ') return 34;
+    else if(letter == '>') return 35;
+}
+
+void outString(char *string, uint16_t Xpos, uint16_t Ypos, uint32_t charColor)
+{
+    char temp;
+    uint8_t ascii;
+    while(*string != 0)     //while not the null character
+    {
+        temp = *string;
+        ascii = getAscii(temp);
+        if(ascii == 34)
+        {
+            Xpos += 1;
+        }
+        else
+        {
+            LM_Text(Xpos, Ypos, ascii, charColor);
+            Xpos += 4;
+        }
+        *string++;
     }
 }
 
@@ -402,6 +458,14 @@ void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor)
 
         tempAscii = letterZ;
         break;
+    case 34:
+
+        tempAscii = blankSpace;
+        break;
+    case 35:
+
+        tempAscii = menuPointer;
+        break;
     }
 
     int Index = 0;
@@ -414,9 +478,9 @@ void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor)
 
             if (tempAscii[Index]>> (7 - shift) & 0x01 == 0x01 ){
 
-                bufferBlue[i+(j*64)] = charColor  & 0xFF;
-                bufferGreen[i+(j*64)] =( charColor >> 8 ) & 0xFF;
-                bufferRed[i+(j*64)] =(charColor >> 16 ) &0xFF;
+                bufferBlue[i+(j*64)] = charColor  & 0x7F;
+                bufferGreen[i+(j*64)] =( charColor >> 8 ) & 0x7F;
+                bufferRed[i+(j*64)] =(charColor >> 16 ) &0x7F;
 
             }
             shift++;
@@ -623,6 +687,7 @@ void  ReceiveUART_XBee()
      //   while(UCA3STATW);
         if (((RXDataL & 0b00010000) == 0b00010000 || (RXDataL & 0b00100000) == 0b00100000 ) && bullet_flag == 0 ){
             bullet_flag = 1;
+            menuselect_flag = 1;
         }
         //  G8RTOS_SignalSemaphore(&XpData);
 
@@ -1003,35 +1068,140 @@ void enemies_updater(){
 
 }
 
-void LaunchApp() {
+void menuListener()
+{
+    uint8_t temp;
+    menuItem = 0;
 
+    while(1)
+    {
+        temp = P1->IN;
+        if((temp & 0x20) == 0x20)
+        {
+            if(menuItem == 4)
+            {
+                menuItem = 0;
+            }
+            else
+            {
+                menuItem++;
+            }
+            G8RTOS_OS_Sleep(1000);
+        }
+        G8RTOS_OS_Sleep(50);
+    }
+}
 
+static void clearScreen()
+{
+    add_rectangle(0, 0,63,0, 63);
+}
+
+void menu()
+{
+    menuselect_flag = 0;
     out_image(logo, 1, 1, 62, 62);
-    add_rectangle(0, 38, 39, 33, 37);
-   // add_rectangle(0x00ff00ff, 0,63, 0, 63);
+    G8RTOS_OS_Sleep(3000);
 
-     G8RTOS_OS_Sleep(2500);
+    G8RTOS_AddThread(&menuListener, "menuListener", 1);
 
-     add_rectangle(0, 0,63,0, 63);
-  //   G8RTOS_OS_Sleep(1500);
+    clearScreen();
+    LM_Text(2, 6, 35, 0x00ffffff);
+    add_rectangle( 0x00000f00, 10, 11, 0, 64);
+    outString("play", 12, 6, 0x00ffffff);
+    outString("level", 12, 14, 0x00ffffff);
+    outString("ship select", 12, 22, 0x00ffffff);
+    outString("ship color", 12, 30, 0x00ffffff);
+    outString("brightness", 12, 38, 0x00ffffff);
+
+    menuItem = 0;
+    uint8_t menuPrev = menuItem;
+
+    while((P1->IN & 0x40) == 0x40)
+    {
+        if(menuPrev != menuItem)
+        {
+            add_rectangle(0, 2, 5, ((8*menuPrev)+7), ((8*menuPrev)+12));
+            LM_Text(2, ((8*menuItem)+6), 35, 0x00ffffff);
+            menuPrev = menuItem;
+        }
+
+        G8RTOS_OS_Sleep(50);
+    }
+
+    clearScreen();
 
     G8RTOS_AddThread(&display_arena, "Arena", 1);
-     G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-     //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-         G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
-         G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
-        // G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
-        // G8RTOS_AddThread(&output_frame, "outputFrame", 1);
-       //  G8RTOS_AddThread(&writeLogo, "logo", 1);
-         G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
-         G8RTOS_AddThread(&displayBackground, "Background", 1);
+    G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+    //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
+    //G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
+    G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
+    G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
 
-         G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+    G8RTOS_KillSelf();
+    while(1);
+}
+
+void LaunchApp()
+{
+    out_image(logo, 1, 1, 62, 62);
+    add_rectangle(0, 38, 39, 33, 37);
+
+    G8RTOS_OS_Sleep(2500);
+
+    add_rectangle(0, 0,63,0, 63);
+
+//    LM_Text(2, 6, 35, 0x00ffffff);
+//    add_rectangle( 0x00000f00, 10, 11, 0, 64);
+//    outString("play", 12, 6, 0x00ffffff);
+//    outString("level", 12, 14, 0x00ffffff);
+//    outString("ship select", 12, 22, 0x00ffffff);
+//    outString("ship color", 12, 30, 0x00ffffff);
+//    outString("brightness", 12, 38, 0x00ffffff);
+
+    G8RTOS_AddThread(&menu, "Menu", 1);
+    //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
+
+    //G8RTOS_AddThread(&displayBackground, "Background", 1);
+    //add_rectangle( 0x00000f00, 10, 11, 0, 64);
+
+    //while(1)
+    //{
+//        outString("play", 12, 6, 0x00ffffff);
+//        outString("level", 12, 14, 0x00ffffff);
+//        outString("ship select", 12, 22, 0x00ffffff);
+//        outString("ship color", 12, 30, 0x00ffffff);
+//        outString("brightness", 12, 38, 0x00ffffff);
+    //}
+
+    //G8RTOS_OS_Sleep(5000);
+
+    //add_rectangle(0, 0,63,0, 63);
+
+//    G8RTOS_AddThread(&display_arena, "Arena", 1);
+//    //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+//    G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+//    G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
+//    G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
+//    //G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
+//    //G8RTOS_AddThread(&output_frame, "outputFrame", 1);
+//    //G8RTOS_AddThread(&writeLogo, "logo", 1);
+//    G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
+//
+//    G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+
+//    add_rectangle(0, 0,63,0, 63);
+//
+//    G8RTOS_AddThread(&display_arena, "Arena", 1);
+//    G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+//    //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
+//    G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
+//    G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
+//    G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
 
 
     G8RTOS_KillSelf();
-              while(1);
-
+    while(1);
 }
 
 
