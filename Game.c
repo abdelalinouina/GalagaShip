@@ -229,7 +229,9 @@ void display_arena(){
 //     LM_Text(5,25,9,0X00FF6666);
      add_rectangle( 0x00000f00, line_x_start, line_x_end, line_y_start, line_end);
 
-
+     uint8_t prevLives1 = lives;
+     uint8_t tempLives1 = lives;
+     uint8_t tempXP1 = 12;
 
     while(1){
 
@@ -238,6 +240,18 @@ void display_arena(){
         //G8RTOS_WaitSemaphore(&scoreSem);
 
         writeScore(scoreValue, 0x00ffffff);
+
+        if(prevLives1 != lives) add_rectangle(0, 11, 30, 58, 64);
+
+        tempLives1 = lives;
+        tempXP1 = 12;
+        while(tempLives1 != 0)
+        {
+            out_image(heart, 59, tempXP1, 4, 5);
+            tempXP1 += 6;
+            tempLives1--;
+        }
+
         //G8RTOS_SignalSemaphore(&scoreSem);
         G8RTOS_OS_Sleep(55);
 
@@ -951,6 +965,34 @@ void move_greenBug() {
 
 
 
+        }
+
+/* Collision Stuff */
+        uint8_t bugtop, bugleft;
+        uint8_t shiptop, shipleft;
+
+        shiptop = galagaShips_starY;
+        shipleft = galagaShips_starX;
+
+        for(int j = 0; j < numOfBugs; j++)
+        {
+            bugtop = bugs_table[i].ypos;
+            bugleft = bugs_table[i].xpos;
+
+            if((shiptop - bugtop) < 5 && (shiptop - bugtop) > -8 && (shipleft - bugleft) < 5 && (shipleft - bugleft) > -9)
+            {
+                if(lives != 0) lives--;
+                bugs_table[i].alive = 0;
+                galagaShips_starX = 35;
+                galagaShips_starY = 50;
+                //galagaShips_starX_prev = 35;
+                //galagaShips_starY_prev = 50;
+                add_rectangle(0, shipleft-1, shipleft+10, shiptop-1, shiptop+9);
+
+                out_image(GalagaShip, galagaShips_starY,galagaShips_starX, 8, 9);
+                G8RTOS_OS_Sleep(100);
+                break;
+            }
         }
 
         G8RTOS_OS_Sleep(35);
