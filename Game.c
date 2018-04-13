@@ -684,7 +684,7 @@ void moveGlagaShip(){
         if ( get_bit(0, byte) == 0x01) galagaShips_starX--;
         if (galagaShips_starX <=12) galagaShips_starX = 12;
         if ( get_bit(3, byte) == 0x01) galagaShips_starY++;
-        if (galagaShips_starY >=50) galagaShips_starY = 50;
+        if (galagaShips_starY >=49) galagaShips_starY = 49;
         if ( get_bit(2, byte) == 0x01) galagaShips_starY--;
         if (galagaShips_starY <=1) galagaShips_starY = 1;
 
@@ -1187,24 +1187,10 @@ static void clearScreen()
     add_rectangle(0, 0,64,0, 64);
 }
 
-static void initialize()
-{
-    scoreValue = 0;
-    lives = 3;
-    bullet_flag = 0;
-    menuselect_flag = 0;
-    menuItem = 0;
-    life_bugs = 0;
-    for(int i = 0; i < numOfBugs; i++)
-    {
-        bugs_table[i].alive = 0;
-    }
-}
-
 void menu()
 {
     menuselect_flag = 0;
-    initialize();
+    lives = 3;
     clearScreen();
     out_image(logo, 1, 1, 62, 62);
     G8RTOS_OS_Sleep(3000);
@@ -1246,7 +1232,6 @@ void menu()
             outString("<", 21, 36, 0x00ffffff);
             outString(">", 41, 36, 0x00ffffff);
             sel = 0;
-            RXDataL = 0;
             G8RTOS_OS_Sleep(500);
 
             while(1)
@@ -1311,7 +1296,7 @@ void menu()
     uint8_t tempXP = 12;
     while(tempLives != 0)
     {
-        out_image(heart, 61, tempXP, 4, 5);
+        out_image(heart, 59, tempXP, 4, 5);
         tempXP += 6;
         tempLives--;
     }
@@ -1334,7 +1319,7 @@ void menu()
     tempXP = 12;
     while(tempLives != 0)
     {
-        out_image(heart, 61, tempXP, 4, 5);
+        out_image(heart, 59, tempXP, 4, 5);
         tempXP += 6;
         tempLives--;
     }
