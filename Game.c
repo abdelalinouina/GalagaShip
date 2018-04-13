@@ -261,7 +261,7 @@ void display_arena(){
 
 void writeScore(uint8_t score, int color, uint8_t end)
 {
-    if(end)
+    if(end == 1)
     {
         if(score < 10)
         {
@@ -680,13 +680,13 @@ void moveGlagaShip(){
        // G8RTOS_SignalSemaphore(&XpData);
 
         if ( get_bit(1, byte) == 0x01) galagaShips_starX++;
-        if (galagaShips_starX >=52) galagaShips_starX = 52;
+        if (galagaShips_starX >=54) galagaShips_starX = 54;
         if ( get_bit(0, byte) == 0x01) galagaShips_starX--;
         if (galagaShips_starX <=12) galagaShips_starX = 12;
         if ( get_bit(3, byte) == 0x01) galagaShips_starY++;
-        if (galagaShips_starY >=52) galagaShips_starY = 52;
+        if (galagaShips_starY >=50) galagaShips_starY = 50;
         if ( get_bit(2, byte) == 0x01) galagaShips_starY--;
-        if (galagaShips_starY <=0) galagaShips_starY = 0;
+        if (galagaShips_starY <=1) galagaShips_starY = 1;
 
         add_rectangle( 0, galagaShips_starX_prev, galagaShips_starX_prev+10, galagaShips_starY_prev, galagaShips_starY_prev+10);
         out_image(GalagaShip, galagaShips_starY,galagaShips_starX, 8, 9);
@@ -1231,7 +1231,8 @@ void menu()
             LM_Text(31, 24, gameLevel, 0x00ffffff);
             outString("<", 21, 36, 0x00ffffff);
             outString(">", 41, 36, 0x00ffffff);
-            G8RTOS_OS_Sleep(500);
+            sel = sel & 0x10;
+            G8RTOS_OS_Sleep(1000);
 
             while(1)
             {
@@ -1294,7 +1295,7 @@ void menu()
     uint8_t tempXP = 12;
     while(tempLives != 0)
     {
-        out_image(heart, 59, tempXP, 4, 5);
+        out_image(heart, 60, tempXP, 4, 5);
         tempXP += 6;
         tempLives--;
     }
@@ -1317,7 +1318,7 @@ void menu()
     tempXP = 12;
     while(tempLives != 0)
     {
-        out_image(heart, 59, tempXP, 4, 5);
+        out_image(heart, 60, tempXP, 4, 5);
         tempXP += 6;
         tempLives--;
     }
@@ -1337,25 +1338,20 @@ void EndGame()
     G8RTOS_KillAllOtherThreads();
 
     G8RTOS_AddThread(&IdleThread, "Idle", 255);
-    G8RTOS_AddThread(&menu, "Menu", 1);
     G8RTOS_AddThread(&displayBackground, "Background", 1);
     G8RTOS_AddThread(&output_frame, "OutputFrame", 1);
 
-    //ButtonsInit();
+    clearScreen();
+    outString("final score", 12, 22, 0x00ffffff);
+    writeScore(scoreValue, 0x00ffffff, 1);
 
-    //clearScreen();
+    G8RTOS_OS_Sleep(5000);
 
-    //outString("final score", 16, 16, 0x00ffffff);
-    //writeScore(scoreValue, 0x00ffffff, 0);
-
-    //G8RTOS_OS_Sleep(500);
-
-    //G8RTOS_AddThread(&menu, "LaunchApp", 1);
-    //clearScreen();
+    clearScreen();
+    G8RTOS_AddThread(&menu, "Menu", 1);
 
     G8RTOS_KillSelf();
     while(1);
-
 }
 
 
