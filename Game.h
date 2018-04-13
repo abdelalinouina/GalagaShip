@@ -20,6 +20,7 @@ extern uint8_t scoreValue;
 uint8_t RXData_Pi;
 
 void writeScore(uint8_t score, int color, uint8_t end);
+void followMe();
 void EndGame();
 void menu();
 void outString(char *string, uint16_t Xpos, uint16_t Ypos, uint32_t charColor);

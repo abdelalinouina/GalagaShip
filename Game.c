@@ -58,6 +58,7 @@ struct green_bug {
 
 typedef struct green_bug green_bug_t;
 
+uint8_t RXData_Pi;
 uint8_t scoreValue = 0;
 uint8_t gameLevel = 0;
 uint8_t lives = 0;
@@ -114,6 +115,7 @@ uint8_t path_X[100] = {64,63,62,62,61,60,59,58,58,57,55,54,54,52,51,50,49,48,47,
 uint8_t path_Y[100] = {35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,41,41,42,42,43,43,43,43,43,44,43,43,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25};
 int8_t galagaShips_starY = 50;
 int8_t galagaShips_starX = 35;
+uint8_t lo, hi;
 uint8_t to_be_deleted_x, to_be_deleted_y;
 int8_t galagaShips_starY_prev, galagaShips_starX_prev ;
 
@@ -757,7 +759,16 @@ void  ReceiveUART_Pi()
 
         RXData_Pi = MAP_UART_receiveData(EUSCI_A1_BASE);
 
-        while(UCA3STATW & UCBUSY);
+        if (RXData_Pi >= 128){
+            hi =0;
+
+        } else
+        {
+            lo = RXData_Pi;
+        }
+
+
+        //while(UCA3STATW & UCBUSY);
        //// if (((RXDataL & 0b00010000) == 0b00010000 || (RXDataL & 0b00100000) == 0b00100000 ) && bullet_flag == 0 ){
        //     bullet_flag = 1;
         //}
@@ -1191,6 +1202,7 @@ void menu()
 {
     //menuselect_flag = 0;
     lives = 3;
+    life_bugs = 0;
     clearScreen();
     out_image(logo, 1, 1, 62, 62);
     G8RTOS_OS_Sleep(3000);
@@ -1324,10 +1336,9 @@ void menu()
         tempLives--;
     }
 
-    //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
-    //G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
     G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
     G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+    G8RTOS_AddThread(&followMe, "followme",1);
 
     G8RTOS_KillSelf();
     while(1);
@@ -1524,6 +1535,30 @@ void initUARTP3()
 
     /* Enable UART module */
     MAP_UART_enableModule(EUSCI_A1_BASE);
+}
+
+void followMe(){
+
+    uint8_t xpos, ypos, prev_xpos, prev_ypos;
+
+
+    while(1){
+
+        add_rectangle( 0, prev_xpos, prev_xpos+5, prev_ypos, prev_ypos+5);
+
+        xpos = lo;
+        if (xpos > 58 )  xpos = 58;
+        ypos = hi;
+        if (ypos > 58 )  ypos = 58;
+        add_rectangle( 0x000000FF, xpos,xpos+5, ypos, ypos+5);
+        prev_xpos = xpos;
+        prev_ypos = ypos;
+
+
+
+        G8RTOS_OS_Sleep(41);
+
+    }
 }
 
 
