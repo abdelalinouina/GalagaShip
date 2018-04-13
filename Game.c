@@ -1189,7 +1189,7 @@ static void clearScreen()
 
 void menu()
 {
-    menuselect_flag = 0;
+    //menuselect_flag = 0;
     lives = 3;
     clearScreen();
     out_image(logo, 1, 1, 62, 62);
@@ -1231,7 +1231,7 @@ void menu()
             LM_Text(31, 24, gameLevel, 0x00ffffff);
             outString("<", 21, 36, 0x00ffffff);
             outString(">", 41, 36, 0x00ffffff);
-            sel = 0;
+            //sel = 0;
             G8RTOS_OS_Sleep(500);
 
             while(1)
