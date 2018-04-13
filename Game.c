@@ -1187,10 +1187,24 @@ static void clearScreen()
     add_rectangle(0, 0,64,0, 64);
 }
 
+static void initialize()
+{
+    scoreValue = 0;
+    lives = 3;
+    bullet_flag = 0;
+    menuselect_flag = 0;
+    menuItem = 0;
+    life_bugs = 0;
+    for(int i = 0; i < numOfBugs; i++)
+    {
+        bugs_table[i].alive = 0;
+    }
+}
+
 void menu()
 {
     menuselect_flag = 0;
-    lives = 3;
+    initialize();
     clearScreen();
     out_image(logo, 1, 1, 62, 62);
     G8RTOS_OS_Sleep(3000);
@@ -1231,8 +1245,9 @@ void menu()
             LM_Text(31, 24, gameLevel, 0x00ffffff);
             outString("<", 21, 36, 0x00ffffff);
             outString(">", 41, 36, 0x00ffffff);
-            sel = sel & 0x10;
-            G8RTOS_OS_Sleep(1000);
+            sel = 0;
+            RXDataL = 0;
+            G8RTOS_OS_Sleep(500);
 
             while(1)
             {
@@ -1245,7 +1260,7 @@ void menu()
                     add_rectangle(0, 30, 34, 23, 30);
                     LM_Text(31, 24, gameLevel, 0x00ffffff);
 
-                    G8RTOS_OS_Sleep(150);
+                    G8RTOS_OS_Sleep(300);
                 }
                 else if((sel & 0x02) == 0x02)
                 {
@@ -1255,11 +1270,11 @@ void menu()
                     add_rectangle(0, 30, 34, 23, 30);
                     LM_Text(31, 24, gameLevel, 0x00ffffff);
 
-                    G8RTOS_OS_Sleep(150);
+                    G8RTOS_OS_Sleep(300);
                 }
                 else if((sel & 0x10) == 0x10)
                 {
-                    G8RTOS_OS_Sleep(250);
+                    G8RTOS_OS_Sleep(300);
                     break;
                 }
             }
@@ -1272,6 +1287,7 @@ void menu()
             outString("ship color", 12, 30, 0x00ffffff);
             outString("brightness", 12, 38, 0x00ffffff);
             menuPrev = 0;
+            menuItem = 1;
         }
         else if(((sel & 0x10) == 0x10) && menuPrev == 2)    //Ship Select
         {
@@ -1295,7 +1311,7 @@ void menu()
     uint8_t tempXP = 12;
     while(tempLives != 0)
     {
-        out_image(heart, 60, tempXP, 4, 5);
+        out_image(heart, 61, tempXP, 4, 5);
         tempXP += 6;
         tempLives--;
     }
@@ -1304,7 +1320,7 @@ void menu()
 
     G8RTOS_AddThread(&display_arena, "Arena", 1);
     G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-    G8RTOS_AddThread(&displayBackground, "Background", 1);
+    //G8RTOS_AddThread(&displayBackground, "Background", 1);
 
     outString("level", 24, 24, 0x00ffffff);
     LM_Text(46, 24, gameLevel, 0x00ffffff);
@@ -1318,7 +1334,7 @@ void menu()
     tempXP = 12;
     while(tempLives != 0)
     {
-        out_image(heart, 60, tempXP, 4, 5);
+        out_image(heart, 61, tempXP, 4, 5);
         tempXP += 6;
         tempLives--;
     }
@@ -1349,6 +1365,7 @@ void EndGame()
 
     clearScreen();
     G8RTOS_AddThread(&menu, "Menu", 1);
+    G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
 
     G8RTOS_KillSelf();
     while(1);

@@ -96,6 +96,7 @@ void main(void)
     //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
     G8RTOS_AddThread(&IdleThread, "idle", 255);
     G8RTOS_AddThread(&menu, "LaunchApp", 1);
+    G8RTOS_AddThread(&displayBackground, "Background", 1);
     G8RTOS_AddThread(&output_frame, "outputFrame", 1);
     G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
 
