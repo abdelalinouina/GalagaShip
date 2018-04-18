@@ -701,7 +701,7 @@ void  ReceiveUART_XBee()
 
         // return RXDataL;
 
-        G8RTOS_OS_Sleep(89);
+        G8RTOS_OS_Sleep(39);
     }
 }
 
@@ -1205,35 +1205,46 @@ void enemies_updater(){
 void menuListener()
 {
     uint8_t temp;
+    uint8_t xtemp, ytemp;
     menuItem = 0;
 
     while(1)
     {
-        temp = RXDataL;
-        if((temp & 0x08) == 0x08)
-        {
-            if(menuItem == 4)
-            {
-                menuItem = 0;
-            }
-            else
-            {
-                menuItem++;
-            }
-            G8RTOS_OS_Sleep(250);
-        }
-        else if((temp & 0x04) == 0x04)
-        {
-            if(menuItem == 0)
-            {
-                menuItem = 4;
-            }
-            else
-            {
-                menuItem--;
-            }
-            G8RTOS_OS_Sleep(250);
-        }
+//        temp = RXDataL;
+//        if((temp & 0x08) == 0x08)
+//        {
+//            if(menuItem == 3)
+//            {
+//                menuItem = 0;
+//            }
+//            else
+//            {
+//                menuItem++;
+//            }
+//            G8RTOS_OS_Sleep(250);
+//        }
+//        else if((temp & 0x04) == 0x04)
+//        {
+//            if(menuItem == 0)
+//            {
+//                menuItem = 3;
+//            }
+//            else
+//            {
+//                menuItem--;
+//            }
+//            G8RTOS_OS_Sleep(250);
+//        }
+//        G8RTOS_OS_Sleep(50);
+
+
+        ytemp = hi;
+        xtemp = lo;
+        if(ytemp < 25) menuItem = 0;
+        else if(ytemp >= 25 && ytemp < 31) menuItem = 1;
+        else if(ytemp >= 31 && ytemp < 36) menuItem = 2;
+        else if(ytemp > 36) menuItem = 3;
+
         G8RTOS_OS_Sleep(50);
     }
 }
@@ -1268,48 +1279,16 @@ void menu()
     G8RTOS_AddThread(&menuListener, "menuListener", 1);
 
     clearScreen();
-    LM_Text(2, 6, 35, 0x00ffffff);
+    LM_Text(2, 10, 35, 0x00ffffff);
+    LM_Text(2, 20, 35, 0x00030303);
+    LM_Text(2, 30, 35, 0x00030303);
+    LM_Text(2, 40, 35, 0x00030303);
     add_rectangle( 0x00000f00, 10, 11, 0, 64);
-    outString("play", 12, 6, 0x00ffffff);
-    outString("level", 12, 14, 0x00ffffff);
-    outString("ship select", 12, 22, 0x00ffffff);
-    outString("ship color", 12, 30, 0x00ffffff);
-    outString("brightness", 12, 38, 0x00ffffff);
-    //out_image(heart, 56, 2, 4, 5);
-
-//    while(1)
-//    {
-//        add_rectangle( 0, 19, 30, 47, 60);
-//        outString("xpos", 12, 48, 0x00ffffff);
-//        outString("ypos", 12, 56, 0x00ffffff);
-//
-//        if(hi < 10)
-//        {
-//            LM_Text(48, 20, hi, 0x00ffffff);
-//        }
-//        else
-//        {
-//            uint8_t ones = 0, tens = 0;
-//            tens = hi / 10;
-//            ones = hi % 10;
-//            LM_Text(48, 20, hi, 0x00ffffff);
-//            LM_Text(52, 20, hi, 0x00ffffff);
-//        }
-//        if(lo < 10)
-//        {
-//            LM_Text(48, 20, lo, 0x00ffffff);
-//        }
-//        else
-//        {
-//            uint8_t ones = 0, tens = 0;
-//            tens = lo / 10;
-//            ones = lo % 10;
-//            LM_Text(48, 20, lo, 0x00ffffff);
-//            LM_Text(52, 20, lo, 0x00ffffff);
-//        }
-//        G8RTOS_OS_Sleep(50);
-//    }
-
+    outString("play", 12, 10, 0x00ffffff);
+    outString("level", 12, 20, 0x00ffffff);
+    outString("ship select", 12, 30, 0x00ffffff);
+    outString("ship color", 12, 40, 0x00ffffff);
+    outString("go", 26, 55, 0x00ffffff);
 
     menuItem = 0;
     uint8_t menuPrev = menuItem;
@@ -1320,8 +1299,9 @@ void menu()
         sel = RXDataL;
         if(menuPrev != menuItem)
         {
-            add_rectangle(0, 2, 5, ((8*menuPrev)+7), ((8*menuPrev)+12));
-            LM_Text(2, ((8*menuItem)+6), 35, 0x00ffffff);
+            //add_rectangle(0, 2, 5, ((10*menuPrev)+10), ((10*menuPrev)+16));
+            LM_Text(2, ((10*menuPrev)+10), 35, 0x00030303);
+            LM_Text(2, ((10*menuItem)+10), 35, 0x00ffffff);
             menuPrev = menuItem;
         }
         else if(((sel & 0x10) == 0x10) && menuPrev == 0)    //PLAY
@@ -1384,10 +1364,6 @@ void menu()
 
         }
         else if(((sel & 0x10) == 0x10) && menuPrev == 3)    //Color Select
-        {
-
-        }
-        else if(((sel & 0x10) == 0x10) && menuPrev == 4)    //Brightness (Optional)
         {
 
         }
@@ -1552,7 +1528,7 @@ void initUART_XBee()
 
 
 
-void initUARTP3()
+void initUARTP2()
 {
     /* Selecting P2.2 and P2.3 in UART mode */
     MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P2,
@@ -1563,6 +1539,19 @@ void initUARTP3()
 
     /* Enable UART module */
     MAP_UART_enableModule(EUSCI_A1_BASE);
+}
+
+void initUARTP3()
+{
+    /* Selecting P3.2 and P3.3 in UART mode */
+    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P3,
+            GPIO_PIN1 | GPIO_PIN2 | GPIO_PIN3, GPIO_PRIMARY_MODULE_FUNCTION);
+
+    /* Configuring UART Module */
+    MAP_UART_initModule(EUSCI_A2_BASE, &uartConfig);
+
+    /* Enable UART module */
+    MAP_UART_enableModule(EUSCI_A2_BASE);
 }
 
 void followMe(){

@@ -88,7 +88,7 @@ void main(void)
     G8RTOS_Init();
     ButtonsInit();
     initUART_XBee();
-    initUARTP3();
+    initUARTP2();
 
     //srand(time(NULL));
 
@@ -100,7 +100,7 @@ void main(void)
     G8RTOS_AddThread(&menu, "LaunchApp", 1);
     G8RTOS_AddThread(&displayBackground, "Background", 1);
     G8RTOS_AddThread(&output_frame, "outputFrame", 1);
-    //G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
+    G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
     //G8RTOS_AddThread(&followMe, "followme",1);
     G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
 
@@ -113,133 +113,127 @@ void main(void)
     //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
     //G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
 
-
-    //bufferGreen[0] = 0x01;
-    //bufferBlue[0]= 0;
-    //bufferRed[0] =0;
     G8RTOS_Launch();
 
 
-
-       //
-       //    MAP_WDT_A_holdTimer();
-       //
-       //    G8RTOS_Init();
-       //       //initSPI();
-       //       //initUARTP9();
-       //
-       //       initUARTP3();
-       //
-       //       //initReceiveInt();
-       //       //initADC();
-       //
-       //   //    while(1)
-       //   //    {
-       //   //        //MAP_UART_transmitData(EUSCI_A2_BASE, '5');
-       //   //        //while(UCA2STATW & UCBUSY);
-       //   //        byte = MAP_UART_receiveData(EUSCI_A3_BASE);
-       //   //        while(UCA3STATW & UCBUSY);
-       //   //        //for(int i = 0; i < 100000; i++);
-       //   //    }
-       //
-       //   //    P6->SEL0 = 0;
-       //   //    P6->DIR = 0xff;
-       //   //    P6->OUT = 0x00;
-       //   //
-       //   //    while(1)
-       //   //    {
-       //   //
-       //   //        P6->OUT ^= 0x01;
-       //   //        //for(int j = 0; j < 10000; j++);
-       //   ////        P6->OUT = 0xff;
-       //   //    }
-       //
-       //       //G8RTOS_AddThread(&IdleThread, "idle", 255);
-       //       //G8RTOS_AddThread(&ReadThread, "ReadThread", 1);
-       //       //G8RTOS_Launch();
-       //
-       //       int16_t *xcoord;
-       //       int16_t *ycoord;
-       //       int16_t x, y;
-       //       uint8_t buttons;
-       //
-       //       P4->DIR = 0x00;
-       //       P4->REN = BIT0 || BIT1 || BIT2;
-       //       P4->OUT = BIT0 || BIT1 || BIT2;
-       //
-       //       BSP_InitBoard();
-       //
-       //       while(1)
-       //       {
-       //           GetJoystickCoordinates(&xcoord, &ycoord);
-       //           x = xcoord;
-       //           y = ycoord;
-       //
-       //           tempx = xcoord;
-       //           tempy = ycoord;
-       //
-       //           if(y < -2000)
-       //           {
-       //               byte = 0b00000001;
-       //               //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
-       //           }
-       //           else if(y >= -2000 && y < 2000)
-       //           {
-       //               byte = 0b00000000;
-       //               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-       //           }
-       //           else if(y >= 2000)
-       //           {
-       //               byte = 0b00000010;
-       //               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-       //           }
-       //
-       //           if(x < -2000)
-       //           {
-       //               byte = byte | 0b00001000;
-       //               //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
-       //           }
-       //           else if(x >= -2000 && x < 2000)
-       //           {
-       //               byte = byte & 0b11110111;
-       //               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-       //           }
-       //           else if(x >= 2000)
-       //           {
-       //               byte = byte | 0b00000100;
-       //               //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
-       //           }
-       //
-       //           buttons = P4->IN;
-       //           if((buttons & 0x01) == 0x01 || (buttons & 0x02) == 0x02 || (buttons & 0x04) == 0x04)
-       //           {
-       //               byte = byte | 0b00010000;
-       //           }
-       //           else
-       //           {
-       //               byte = byte & 0b11101111;
-       //           }
-       //
-       //           byte = byte | 0b10000000;
-       //
-       //           MAP_UART_transmitData(EUSCI_A2_BASE, byte);
-       //
-       //           //transmitSPI(i);
-       //           //i++;
-       //           //for(int x = 0; x < 10000; x++);
-       //           //if(i > 0x7ff) i = 0x4ff;
-       //
-       //       }
-       //
-       //   //    uint16_t data = 0;
-       //   //
-       //   //    while(1)
-       //   //    {
-       //   //        data = ReceiveUART();
-       //   //    }
-
-
+/* Programming the Controller */
+//
+//           MAP_WDT_A_holdTimer();
+//
+//           G8RTOS_Init();
+//              //initSPI();
+//              //initUARTP9();
+//
+//              initUARTP3();
+//
+//              //initReceiveInt();
+//              //initADC();
+//
+//          //    while(1)
+//          //    {
+//          //        //MAP_UART_transmitData(EUSCI_A2_BASE, '5');
+//          //        //while(UCA2STATW & UCBUSY);
+//          //        byte = MAP_UART_receiveData(EUSCI_A3_BASE);
+//          //        while(UCA3STATW & UCBUSY);
+//          //        //for(int i = 0; i < 100000; i++);
+//          //    }
+//
+//          //    P6->SEL0 = 0;
+//          //    P6->DIR = 0xff;
+//          //    P6->OUT = 0x00;
+//          //
+//          //    while(1)
+//          //    {
+//          //
+//          //        P6->OUT ^= 0x01;
+//          //        //for(int j = 0; j < 10000; j++);
+//          ////        P6->OUT = 0xff;
+//          //    }
+//
+//              //G8RTOS_AddThread(&IdleThread, "idle", 255);
+//              //G8RTOS_AddThread(&ReadThread, "ReadThread", 1);
+//              //G8RTOS_Launch();
+//
+//              int16_t *xcoord;
+//              int16_t *ycoord;
+//              int16_t x, y;
+//              uint8_t buttons;
+//
+//              P4->DIR = 0x00;
+//              P4->REN = BIT0 || BIT1 || BIT2;
+//              P4->OUT = BIT0 || BIT1 || BIT2;
+//
+//              BSP_InitBoard();
+//
+//              while(1)
+//              {
+//                  GetJoystickCoordinates(&xcoord, &ycoord);
+//                  x = xcoord;
+//                  y = ycoord;
+//
+//                  tempx = xcoord;
+//                  tempy = ycoord;
+//
+//                  if(y < -2000)
+//                  {
+//                      byte = 0b00000001;
+//                      //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
+//                  }
+//                  else if(y >= -2000 && y < 2000)
+//                  {
+//                      byte = 0b00000000;
+//                      //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//                  }
+//                  else if(y >= 2000)
+//                  {
+//                      byte = 0b00000010;
+//                      //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//                  }
+//
+//                  if(x < -2000)
+//                  {
+//                      byte = byte | 0b00001000;
+//                      //MAP_UART_transmitData(EUSCI_A2_BASE, 1);
+//                  }
+//                  else if(x >= -2000 && x < 2000)
+//                  {
+//                      byte = byte & 0b11110111;
+//                      //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//                  }
+//                  else if(x >= 2000)
+//                  {
+//                      byte = byte | 0b00000100;
+//                      //MAP_UART_transmitData(EUSCI_A2_BASE, 2);
+//                  }
+//
+//                  buttons = P4->IN;
+//                  if((buttons & 0x01) == 0x01 || (buttons & 0x02) == 0x02 || (buttons & 0x04) == 0x04)
+//                  {
+//                      byte = byte | 0b00010000;
+//                  }
+//                  else
+//                  {
+//                      byte = byte & 0b11101111;
+//                  }
+//
+//                  byte = byte | 0b10000000;
+//
+//                  MAP_UART_transmitData(EUSCI_A2_BASE, byte);
+//
+//                  //transmitSPI(i);
+//                  //i++;
+//                  for(int x = 0; x < 580000; x++);
+//                  //if(i > 0x7ff) i = 0x4ff;
+//
+//              }
 }
+
+
+
+
+
+
+
 
 
 

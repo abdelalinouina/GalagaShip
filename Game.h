@@ -38,6 +38,7 @@ void move_bullet();
 void bug_bullet();
 void IdleThread();
 void LaunchApp();
+void initUARTP2();
 void initUARTP3();
 void initUART_XBee();
 void output_frame();
