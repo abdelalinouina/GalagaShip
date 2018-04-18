@@ -33,8 +33,9 @@ void writeLogo();
 void moveGlagaShip();
 void initUART_XBee();
 void ReceiveUART_Pi();
-void  ReceiveUART_XBee();
+void ReceiveUART_XBee();
 void move_bullet();
+void bug_bullet();
 void IdleThread();
 void LaunchApp();
 void initUARTP3();
@@ -45,8 +46,9 @@ void out_pixel(uint8_t xpos, uint8_t ypos,  uint8_t red, uint8_t green, uint8_t 
 void add_rectangle(int color, uint8_t x_start,uint8_t x_end, uint8_t y_start ,uint8_t y_end);
 void out_bullet(uint8_t xpos, uint8_t ypos,  uint8_t red, uint8_t green, uint8_t blue);
 void move_greenBug();
+void shoot_greenBug();
 void add_greenBugs();
-void  check_bullet_collision(uint8_t xpos, uint8_t ypos );
+void check_bullet_collision(uint8_t xpos, uint8_t ypos, uint8_t fromBug);
 void out_exposion(uint8_t xpos, uint8_t ypos);
 void enemies_updater();
 

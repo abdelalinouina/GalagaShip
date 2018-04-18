@@ -7,8 +7,8 @@
 
 #include "Game.h"
 #define numOfBugs 6
-struct star {
-
+struct star
+{
     uint8_t xpos;
     uint8_t ypos;
     uint8_t pre_xpos;
@@ -16,32 +16,22 @@ struct star {
     uint8_t on;
     int sleepcount;
     int sleepMax;
-
-
 } ;
 
 typedef struct star star_t;
 
-
-
-
-struct bullet {
-
+struct bullet
+{
     uint8_t xpos;
     uint8_t ypos;
     uint8_t pre_xpos;
     uint8_t speed;
-
-
-
 } ;
 
 typedef struct bullet bullet_t;
 
-
-
-struct green_bug {
-
+struct green_bug
+{
     uint8_t xpos;
     uint8_t ypos;
     uint8_t pre_xpos;
@@ -49,11 +39,11 @@ struct green_bug {
     uint8_t alive;
     uint8_t distination_x;
     uint8_t distination_y;
+    uint8_t predistination_x;
+    uint8_t predistination_y;
     uint8_t inTheTable;
     uint8_t isLast;
-
-
-
+    uint8_t isShooting;
 } ;
 
 typedef struct green_bug green_bug_t;
@@ -62,9 +52,10 @@ uint8_t RXData_Pi;
 uint8_t scoreValue = 0;
 uint8_t gameLevel = 0;
 uint8_t lives = 0;
-static green_bug_t bugs_table[numOfBugs];
+static green_bug_t bugs_table[20];
 uint8_t bullet_flag = 0;
 uint8_t menuselect_flag = 0;
+uint8_t shoot_flag = 0;
 uint8_t menuItem = 0;
 volatile uint8_t RXDataL, RXDataL_temp = 0;
 #define MAX_stars 15
@@ -132,6 +123,61 @@ const eUSCI_UART_Config uartConfig =
      EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION  // Oversampling
 };
 
+uint32_t Razor1 [81] = {0,0,0,0,0x00d30f03,0,0,0,0,
+                       0,0,0,0,0x00d30f03,0,0,0,0,
+                       0,0,0,0x00ff0000,0x00d30f03,0x00ff0000,0,0,0,
+                       0,0,0x00ff0000,0x00ff0000,0x00d30f03,0x00ff0000,0x00ff0000,0,0,
+                       0x00d30f03, 0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,
+                       0,0,0x00ff0000,0x00ff0000,0x00d30f03,0x00ff0000,0x00ff0000,0,0,
+                       0,0,0,0x00ff0000,0x00d30f03,0x00ff0000,0,0,0,
+                       0,0,0,0,0x00d30f03,0,0,0,0,
+                       0, 0,0,0,0x00d30f03,0,0,0,0
+};
+
+uint32_t Razor2 [81] = {0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,
+                       0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,
+                       0x00000000,0x00000000,0x00000000,0x00ff0000,0x00d30f03,0x00ff0000,0x00000000,0x00000000,0x00000000,
+                       0x00d30f03,0x00d30f03,0x00ff0000,0x00ff0000,0x00d30f03,0x00ff0000,0x00ff0000,0x00000000,0x00000000,
+                       0x00000000,0x00000000,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00000000,0x00000000,
+                       0x00000000,0x00000000,0x00ff0000,0x00ff0000,0x00d30f03,0x00ff0000,0x00ff0000,0x00d30f03,0x00d30f03,
+                       0x00000000,0x00000000,0x00000000,0x00ff0000,0x00d30f03,0x00ff0000,0x00000000,0x00000000,0x00000000,
+                       0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,
+                       0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+};
+
+uint32_t Razor3 [81] = {0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00ff0000,0x00d30f03,0x00ff0000,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00ff0000,0x00ff0000,0x00d30f03,0x00ff0000,0x00ff0000,0x00d30f03,0x00d30f03,
+                        0x00000000,0x00000000,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00d30f03,0x00000000,0x00000000,
+                        0x00d30f03,0x00d30f03,0x00ff0000,0x00ff0000,0x00d30f03,0x00ff0000,0x00ff0000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00ff0000,0x00d30f03,0x00ff0000,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000
+};
+
+uint32_t Razor4 [81] = {0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,
+                        0x00000000,0x00000000,0x00d30f03,0x00000000,0x00ff0000,0x00000000,0x00d30f03,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00d30f03,0x00ff0000,0x00d30f03,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00ff0000,0x00ff0000,0x00d30f03,0x00ff0000,0x00ff0000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00d30f03,0x00ff0000,0x00d30f03,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00d30f03,0x00000000,0x00ff0000,0x00000000,0x00d30f03,0x00000000,0x00000000,
+                        0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,
+};
+
+uint32_t Bomb_G [81] =   {0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00000000,0x00d30f03,0x00000000,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00071947,0x00071947,0x00071947,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00071947,0x00071947,0x00071947,0x00000000,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00071947,0x00071947,0x00071947,0x00071947,0x00071947,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00071947,0x00071947,0x00071947,0x00071947,0x00071947,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00071947,0x00071947,0x00071947,0x00071947,0x00071947,0x00000000,0x00000000,
+                        0x00000000,0x00000000,0x00000000,0x00071947,0x00071947,0x00071947,0x00000000,0x00000000,0x00000000,
+};
+
 uint32_t GalagaShip[72]= {     0,0,0,0,0X00FF6666,0,0,0,0,
                                0,0,0,0,0X00FF6666,0,0,0,0,
                                0,0,0,0x000000FF,0X00FF6666,0x000000FF,0,0,0,
@@ -140,6 +186,17 @@ uint32_t GalagaShip[72]= {     0,0,0,0,0X00FF6666,0,0,0,0,
                                0X00FF6666,0X00FF6666,0X00FF6666,0xFF0000,0X00FF6666,0xFF0000,0X00FF6666,0X00FF6666,0X00FF6666,
                                0X00FF6666,0X00FF6666,0,0xFF0000,0X00FF6666,0xFF0000,0,0X00FF6666,0X00FF6666,
                                0X00FF6666,0,0,0,0X00FF6666,0,0,0,0X00FF6666};
+
+uint32_t GalagaShip2 [81] =   {0x00000000,0x00000000,0x00d30f03,0x00000000,0X00FF0000,0x00000000,0x00d30f03,0x00000000,0x00000000,
+                               0x00000000,0x00000000,0x00d30f03,0X00FF0000,0X00FF0000,0X00FF0000,0x00d30f03,0x00000000,0x00000000,
+                               0x000000FF,0x00000000,0X00FF0000,0X00FF0000,0X00FF0000,0X00FF0000,0X00FF0000,0x00000000,0x000000FF,
+                               0X00FF6666,0x00000000,0x00000000,0x00000000,0X00FF0000,0x00000000,0x00000000,0x00000000,0X00FF6666,
+                               0x00000000,0X00FF6666,0x00000000,0X00FF6666,0X00FF0000,0X00FF6666,0x00000000,0X00FF6666,0x00000000,
+                               0x00000000,0x00000000,0X00FF6666,0X00FF6666,0X00FF0000,0X00FF6666,0X00FF6666,0x00000000,0x00000000,
+                               0x00000000,0x00000000,0x00000000,0x000000FF,0X00FF0000,0x000000FF,0x00000000,0x00000000,0x00000000,
+                               0x000000FF,0x00000000,0X00FF6666,0X00FF6666,0X00FF0000,0X00FF6666,0X00FF6666,0x00000000,0x000000FF,
+                               0X00FF6666,0X00FF6666,0x00000000,0x00000000,0X00FF0000,0x00000000,0x00000000,0X00FF6666,0X00FF6666
+};
 
 uint32_t GreenBug [25] = {0x0000592C,0,0,0,0x0000592C,
                           0x0000592C,0x007F7F00,0x007F7F00,0x007F7F00,0x0000592C,
@@ -196,51 +253,22 @@ void ButtonsInit()
     P2->DIR = 0;
 }
 
-void display_arena(){
- uint8_t line_x_start = 10;
- uint8_t line_y_start = 0;
- uint8_t line_x_end = 11;
- uint8_t line_end = 64;
- int color = 0x0000FF00;
+void display_arena()
+{
+     uint8_t line_x_start = 10;
+     uint8_t line_y_start = 0;
+     uint8_t line_x_end = 11;
+     uint8_t line_end = 64;
+     int color = 0x0000FF00;
 
-// out_image(GreenBug, 10, 20, 5,5);
-//      out_image(GreenBug, 10, 27, 5,5);
-//      out_image(GreenBug, 10, 34, 5,5);
-//      out_image(GreenBug, 10, 41, 5,5);
-//      out_image(GreenBug, 10, 48, 5,5);
-//      out_image(GreenBug, 10, 55, 5,5);
-//      out_image(GreenBug, 17, 23, 5,5);
-//      out_image(GreenBug, 17, 30, 5,5);
-//      out_image(GreenBug, 17, 37, 5,5);
-//      out_image(GreenBug, 17, 44, 5,5);
-//      out_image(GreenBug, 17, 51, 5,5);
-//      out_image(GreenBug, 24, 27, 5,5);
-//      out_image(GreenBug, 24, 34, 5,5);
-//      out_image(GreenBug, 24, 41, 5,5);
-//      out_image(GreenBug, 24, 48, 5,5);
-
-//     LM_Text(1,1,0,0X00FF0000);
-//     LM_Text(5,1,1,0X00FF9933);
-//     LM_Text(1,7,2,0X00FFFF00);
-//     LM_Text(5,7,3,0X0080FF00);
-//     LM_Text(1,13,4,0X0000FFFF);
-//     LM_Text(5,13,5,0X000000FF);
-//     LM_Text(1,19,6,0X000000FF);
-//     LM_Text(5,19,7,0X00990099);
-//     LM_Text(1,25,8,0X00FFFFFF);
-//     LM_Text(5,25,9,0X00FF6666);
      add_rectangle( 0x00000f00, line_x_start, line_x_end, line_y_start, line_end);
 
      uint8_t prevLives1 = lives;
      uint8_t tempLives1 = lives;
      uint8_t tempXP1 = 12;
 
-    while(1){
-
-
-
-        //G8RTOS_WaitSemaphore(&scoreSem);
-
+    while(1)
+    {
         writeScore(scoreValue, 0x00ffffff, 0);
 
         if(prevLives1 != lives) add_rectangle(0, 11, 30, 58, 64);
@@ -254,11 +282,8 @@ void display_arena(){
             tempLives1--;
         }
 
-        //G8RTOS_SignalSemaphore(&scoreSem);
         G8RTOS_OS_Sleep(55);
-
     }
-
 }
 
 void writeScore(uint8_t score, int color, uint8_t end)
@@ -362,212 +387,162 @@ void outString(char *string, uint16_t Xpos, uint16_t Ypos, uint32_t charColor)
 void LM_Text(uint16_t Xpos, uint16_t Ypos, uint8_t ASCI, uint32_t charColor)
 {
     uint8_t* tempAscii;
-
     switch(ASCI){
 
     case 0:
-
         tempAscii = Zero;
         break;
     case 1:
-
         tempAscii = One;
         break;
     case 2:
-
         tempAscii = Two;
         break;
     case 3:
-
         tempAscii = Three;
         break;
     case 4:
-
         tempAscii = Four;
         break;
     case 5:
-
         tempAscii = Five;
         break;
     case 6:
-
         tempAscii = Six;
         break;
     case 7:
-
         tempAscii = Seven;
         break;
     case 8:
-
         tempAscii = Eight;
         break;
     case 9:
-
         tempAscii = Nine;
         break;
     case 10:
-
         tempAscii = letterA;
         break;
     case 11:
-
         tempAscii = letterB;
         break;
     case 12:
-
         tempAscii = letterC;
         break;
     case 13:
-
         tempAscii = letterD;
         break;
     case 14:
-
         tempAscii = letterE;
         break;
     case 15:
-
         tempAscii = letterF;
         break;
     case 16:
-
         tempAscii = letterG;
         break;
     case 17:
-
         tempAscii = letterH;
         break;
     case 18:
-
         tempAscii = letterI;
         break;
     case 19:
-
         tempAscii = letterJ;
         break;
     case 20:
-
         tempAscii = letterK;
         break;
     case 21:
-
         tempAscii = letterL;
         break;
     case 22:
-
         tempAscii = letterN;
         break;
     case 23:
-
         tempAscii = letterO;
         break;
     case 24:
-
         tempAscii = letterP;
         break;
     case 25:
-
         tempAscii = letterQ;
         break;
     case 26:
-
         tempAscii = letterR;
         break;
     case 27:
-
         tempAscii = letterS;
         break;
     case 28:
-
         tempAscii = letterT;
         break;
     case 29:
-
         tempAscii = letterU;
         break;
     case 30:
-
         tempAscii = letterV;
         break;
     case 31:
-
         tempAscii = letterX;
         break;
     case 32:
-
         tempAscii = letterY;
         break;
     case 33:
-
         tempAscii = letterZ;
         break;
     case 34:
-
         tempAscii = blankSpace;
         break;
     case 35:
-
         tempAscii = menuPointer;
         break;
     case 36:
-
         tempAscii = menuPointerInverted;
         break;
     }
 
     int Index = 0;
 
-    for (int i = Xpos; i < Xpos+3; i++){
+    for (int i = Xpos; i < Xpos+3; i++)
+    {
         int shift = 2;
-        for (int j = Ypos ; j< Ypos+7; j++){
-            //  tempZero =Zero[Index]>> (7 - shift) & 0x01 == 0x01;
-            //tempZero2 =Zero[Index];
-
-            if (tempAscii[Index]>> (7 - shift) & 0x01 == 0x01 ){
-
+        for (int j = Ypos ; j< Ypos+7; j++)
+        {
+            if (tempAscii[Index]>> (7 - shift) & 0x01 == 0x01 )
+            {
                 bufferBlue[i+(j*64)] = charColor  & 0x7F;
                 bufferGreen[i+(j*64)] =( charColor >> 8 ) & 0x7F;
                 bufferRed[i+(j*64)] =(charColor >> 16 ) &0x7F;
-
             }
             shift++;
         }
 
         Index++;
     }
-
 }
 
-
-
-void out_image(uint32_t* image, uint8_t Xpos, uint8_t Ypos, uint8_t whidth, uint8_t hight){
-
+void out_image(uint32_t* image, uint8_t Xpos, uint8_t Ypos, uint8_t whidth, uint8_t hight)
+{
     int Index = 0;
-
-    for (int i = Xpos; i < Xpos+whidth; i++){
-
-        for (int j = Ypos ; j< Ypos+hight; j++){
-
-
-
-
+    for (int i = Xpos; i < Xpos+whidth; i++)
+    {
+        for (int j = Ypos ; j< Ypos+hight; j++)
+        {
             bufferBlue[j+(i*64)] = image[Index]  & 0x7F;
             bufferGreen[j+(i*64)] =( image[Index] >> 8 ) & 0x7F;
             bufferRed[j+(i*64)] =(image[Index] >> 16 ) &0x7F;
-
             Index++;
         }
-
-
     }
-
 }
 
 //*****************************************************************************
 void displayBackground(){
 
     int j = 0;
-    for (int i = 0 ; i < MAX_stars ; i+=4){
+    for (int i = 0 ; i < MAX_stars ; i+=4)
+    {
         j++;
         stars_table[i].on = 1;
         stars_table[i].sleepMax  = 20;
@@ -575,12 +550,11 @@ void displayBackground(){
         stars_table[i].xpos = j * 14;
         stars_table[i].sleepcount = 0;
         stars_table[i].speed = 1;
-
-
     }
     j = 0;
 
-    for (int i = 1 ; i < MAX_stars ; i+=3){
+    for (int i = 1 ; i < MAX_stars ; i+=3)
+    {
         j++;
         stars_table[i].on = 1;
         stars_table[i].sleepMax  = 40;
@@ -588,13 +562,12 @@ void displayBackground(){
         stars_table[i].xpos = j * 18;
         stars_table[i].sleepcount = 0;
         stars_table[i].speed = 2;
-
-
     }
 
     j = 0;
 
-    for (int i =2  ; i < MAX_stars ; i+=3){
+    for (int i =2  ; i < MAX_stars ; i+=3)
+    {
         j++;
         stars_table[i].on = 1;
         stars_table[i].sleepMax  = 60;
@@ -602,68 +575,48 @@ void displayBackground(){
         stars_table[i].xpos = j * 42;
         stars_table[i].sleepcount = 0;
         stars_table[i].speed = 1;
-
-
     }
 
-
-
-
-    while (1){
-
-
-        for (int i = 0 ; i < MAX_stars; i++){
-
+    while (1)
+    {
+        for (int i = 0 ; i < MAX_stars; i++)
+        {
             stars_table[i].sleepcount++;
-            if (stars_table[i].xpos > 63 ) stars_table[i].xpos  -=63;
-
-
-            if (stars_table[i].on == 1  ){
-
-
+            if (stars_table[i].xpos > 63 ) stars_table[i].xpos -= 63;
+            if (stars_table[i].on == 1  )
+            {
                 bufferBlue[stars_table[i].ypos+(stars_table[i].pre_xpos*64)] = 0;
                 bufferGreen[stars_table[i].ypos+(stars_table[i].pre_xpos*64)] =0;
                 bufferRed[stars_table[i].ypos+(stars_table[i].pre_xpos*64)] =0;
 
-
-                if ( bufferGreen[stars_table[i].ypos+(stars_table[i].xpos*64) ]== 0 &&  bufferBlue[stars_table[i].ypos+(stars_table[i].xpos*64) ]== 0 &&  bufferRed[stars_table[i].ypos+(stars_table[i].xpos*64) ]== 0){
+                if ( bufferGreen[stars_table[i].ypos+(stars_table[i].xpos*64) ]== 0 &&  bufferBlue[stars_table[i].ypos+(stars_table[i].xpos*64) ]== 0 &&  bufferRed[stars_table[i].ypos+(stars_table[i].xpos*64) ]== 0)
+                {
                     bufferBlue[stars_table[i].ypos+(stars_table[i].xpos*64)] = 10;
                     bufferGreen[stars_table[i].ypos+(stars_table[i].xpos*64)] =10;
                     bufferRed[stars_table[i].ypos+(stars_table[i].xpos*64)] =10;
-                    if (stars_table[i].sleepMax == stars_table[i].sleepcount)  {
+
+                    if (stars_table[i].sleepMax == stars_table[i].sleepcount)
+                    {
                         stars_table[i].sleepcount = 0;
                         stars_table[i].on == 0;
-
-
                     }
 
                     stars_table[i].pre_xpos =stars_table[i].xpos;
                 }
-
-
-
-
-
-
             }
             else
             {
-
-                if (stars_table[i].sleepMax == stars_table[i].sleepcount)  {
+                if (stars_table[i].sleepMax == stars_table[i].sleepcount)
+                {
                     stars_table[i].sleepcount = 0;
                     stars_table[i].on == 1;
-
                 }
             }
 
             stars_table[i].xpos += stars_table[i].speed;
-
-
         }
 
-
         G8RTOS_OS_Sleep(50);
-
     }
 }
 
@@ -701,18 +654,17 @@ void moveGlagaShip(){
 
 }
 
-uint8_t get_bit(uint8_t shift, uint8_t byte){
-
-
+uint8_t get_bit(uint8_t shift, uint8_t byte)
+{
     return (byte >> shift) & 0x01;
 }
 
 
-void   ReceiveUART2(){
-
+void ReceiveUART2()
+{
     int i;
-
- while(1) {
+    while(1)
+    {
         i++;
         G8RTOS_OS_Sleep(100);
     }
@@ -732,9 +684,18 @@ void  ReceiveUART_XBee()
         RXDataL = MAP_UART_receiveData(EUSCI_A3_BASE);
 
        //while(UCA3STATW);
+
+        //if(menuselect flag false, then add bullet)
         if (((RXDataL & 0b00010000) == 0b00010000 || (RXDataL & 0b00100000) == 0b00100000 ) && bullet_flag == 0 ){
-            bullet_flag = 1;
-            menuselect_flag = 1;
+            if(menuselect_flag == 0)
+            {
+                bullet_flag = 1;
+            }
+            else
+            {
+                bullet_flag = 0;
+            }
+            //menuselect_flag = 1;
         }
         //  G8RTOS_SignalSemaphore(&XpData);
 
@@ -759,24 +720,35 @@ void  ReceiveUART_Pi()
 
         RXData_Pi = MAP_UART_receiveData(EUSCI_A1_BASE);
 
-        if (RXData_Pi >= 128){
-            hi =0;
+      //    while(UCA1STATW & UCBUSY);
+       // RXData_Pi = UCA1RXBUF;
 
-        } else
+
+        if (RXData_Pi  != 0)
         {
-            lo = RXData_Pi;
+            if((RXData_Pi & 0x40) == 0x40)
+            {
+                hi = 63 - (RXData_Pi & 0x3f);
+            }
+            else
+            {
+                lo = 63 - (RXData_Pi & 0x3f);
+            }
+            //lo = (RXData_Pi & 0b00000111)*8;
+            //hi =  ((RXData_Pi >> 3) & 0b00001111)*4;
         }
 
+      //    while(UCA1STATW & UCBUSY);
+       // RXData_Pi = UCA1RXBUF;
 
-        //while(UCA3STATW & UCBUSY);
        //// if (((RXDataL & 0b00010000) == 0b00010000 || (RXDataL & 0b00100000) == 0b00100000 ) && bullet_flag == 0 ){
-       //     bullet_flag = 1;
+         //   bullet_flag = 1;
         //}
         //  G8RTOS_SignalSemaphore(&XpData);
 
         // return RXDataL;
 
-        G8RTOS_OS_Sleep(89);
+        G8RTOS_OS_Sleep(50);
     }
 }
 
@@ -800,59 +772,91 @@ void add_rectangle(int color, uint8_t x_start,uint8_t x_end, uint8_t y_start ,ui
     }
 }
 
-void listenForBullets(){
-
-
-    while(1){
-
+void listenForBullets()
+{
+    while(1)
+    {
         if (bullet_flag == 1)
         {
             G8RTOS_AddThread(&move_bullet, "move_bullet", 1);
             bullet_flag = 0;
-            G8RTOS_OS_Sleep(500);
+            G8RTOS_OS_Sleep(1000);
+            bullet_flag = 0;
         }
 
         if(lives == 0)
         {
             G8RTOS_AddThread(&EndGame, "End", 1);
-
         }
         G8RTOS_OS_Sleep(50);
     }
-
 }
 
 
-void move_bullet(){
-
-
+void move_bullet()
+{
     bullet_t b;
     b.ypos = galagaShips_starX+4;
     b.xpos = galagaShips_starY;
 
-    while(1){
-
-
+    while(1)
+    {
         out_bullet(b.pre_xpos,b.ypos, 0,0,0 );
         out_bullet(b.xpos,b.ypos, 0xFF,0x50,0 );
 
+        b.pre_xpos = b.xpos ;
 
-        b.pre_xpos =    b.xpos ;
-
-        if (b.xpos == 2){
-
+        if (b.xpos == 2)
+        {
             out_bullet(b.xpos,b.ypos, 0,0,0 );
-
             G8RTOS_KillSelf();
             while(1);
         }
 
-        check_bullet_collision(b.xpos, b.ypos );
-
+        check_bullet_collision(b.xpos, b.ypos, 0);
         b.xpos--;
 
         G8RTOS_OS_Sleep(30);
     }
+}
+
+void bug_bullet()
+{
+    G8RTOS_OS_Sleep(800);
+    bullet_t b;
+    for(int i = 0; i < numOfBugs; i++)
+    {
+        if(bugs_table[i].isShooting = 1 && bugs_table[i].alive)
+        {
+            b.ypos = bugs_table[i].xpos;
+            b.xpos = bugs_table[i].ypos+4;
+            break;
+        }
+    }
+
+    while(1)
+    {
+        out_pixel(b.pre_xpos,b.ypos, 0,0,0);
+        out_pixel(b.xpos,b.ypos, 0xff,0x50,0);
+        //out_bullet(b.pre_xpos,b.ypos, 0,0,0 );
+        //out_bullet(b.xpos,b.ypos, 0xFF,0x50,0 );
+
+        b.pre_xpos = b.xpos;
+
+        if (b.xpos == 62)
+        {
+            out_pixel(b.xpos,b.ypos, 0,0,0);
+            //out_bullet(b.xpos,b.ypos, 0,0,0 );
+            G8RTOS_KillSelf();
+            while(1);
+        }
+
+        check_bullet_collision(b.xpos, b.ypos, 1);
+        b.xpos++;
+
+        G8RTOS_OS_Sleep(40);
+    }
+
 }
 
 void out_pixel(uint8_t xpos, uint8_t ypos,  uint8_t red, uint8_t green, uint8_t blue  ){
@@ -882,6 +886,8 @@ void add_greenBugs(){
 
                 bugs_table[i].distination_x = xOffset;
                 bugs_table[i].distination_y = 20  + yOffset;
+                bugs_table[i].predistination_x = xOffset;
+                bugs_table[i].predistination_y = 20  + yOffset;
                 yOffset += 7;
 
                 if (i == 2){
@@ -913,14 +919,16 @@ void add_greenBugs(){
 }
 
 
-void move_greenBug() {
+void move_greenBug()
+{
     int path_index=0;
     uint8_t isEntring =1;
     uint8_t prev_xpos,  prev_ypos, xpos, ypos ;
     prev_ypos = path_Y[path_index]-5;
     prev_xpos = path_X[path_index]-5;
     int i=0;
-    while(bugs_table[i].alive == 1){
+    while(bugs_table[i].alive == 1)
+    {
         i++;
     }
     bugs_table[i].alive =1;
@@ -933,10 +941,10 @@ void move_greenBug() {
     //    uint8_t bug_prev_ypos;
 
 
-    while(1){
-
-        if(bugs_table[i].alive == 0){
-
+    while(1)
+    {
+        if(bugs_table[i].alive == 0)
+        {
             scoreValue++;
             if(scoreValue == 100)
             {
@@ -946,6 +954,7 @@ void move_greenBug() {
             out_exposion( bugs_table[i].ypos,  bugs_table[i].xpos);
             add_rectangle( 0, bugs_table[i].xpos, bugs_table[i].xpos+5, bugs_table[i].ypos, bugs_table[i].ypos+5);
             life_bugs--;
+            bugs_table[i].isShooting = 0;
             G8RTOS_KillSelf();
             while(1);
 
@@ -967,40 +976,47 @@ void move_greenBug() {
                 // ypos = path_Y[path_index -1]-5;
                 isEntring = 0;
             }
-        } else
+        }
+        if(isEntring == 0)
         {
 
-            if (bugs_table[i].ypos !=  bugs_table[i].distination_x ){
-
-
-                // out_exposion( bugs_table[i].xpos,  bugs_table[i].ypos);
-
-                bugs_table[i].ypos--;
+            if (bugs_table[i].ypos != bugs_table[i].distination_x)
+            {
+                if (bugs_table[i].ypos > bugs_table[i].distination_x)
+                {
+                    bugs_table[i].ypos--;
+                }
+                if (bugs_table[i].ypos < bugs_table[i].distination_x)
+                {
+                    bugs_table[i].ypos++;
+                }
+            }
+            if (bugs_table[i].xpos !=  bugs_table[i].distination_y)
+            {
+                if (bugs_table[i].xpos > bugs_table[i].distination_y)
+                {
+                    bugs_table[i].xpos--;
+                }
+                if (bugs_table[i].xpos < bugs_table[i].distination_y)
+                {
+                    bugs_table[i].xpos++;
+                }
             }
 
-            if (bugs_table[i].xpos !=  bugs_table[i].distination_y  ){
-
-
-                // out_exposion( bugs_table[i].xpos,  bugs_table[i].ypos);
-
-
-                if (bugs_table[i].xpos > bugs_table[i].distination_y )  bugs_table[i].xpos--;
-                if (bugs_table[i].xpos <  bugs_table[i].distination_y )  bugs_table[i].xpos++;
-
+            if(bugs_table[i].ypos == bugs_table[i].distination_x && bugs_table[i].xpos ==  bugs_table[i].distination_y)
+            {
+                bugs_table[i].distination_y = bugs_table[i].predistination_y;
+                bugs_table[i].distination_x = bugs_table[i].predistination_x;
+                bugs_table[i].isShooting = 0;
             }
-
-            //  if (bugs_table[i].xpos ==  bugs_table[i].distination_y &&  bugs_table[i].ypos ==  bugs_table[i].distination_x )  bugs_table[i].inTheTable = 1;
-
 
             add_rectangle( 0, prev_xpos, prev_xpos+5, prev_ypos, prev_ypos+5);
             out_image(GreenBug, bugs_table[i].ypos, bugs_table[i].xpos, 5,5);
 
             prev_xpos = bugs_table[i].xpos;
             prev_ypos = bugs_table[i].ypos;
-
-
-
         }
+
 
 /* Collision Stuff */
         uint8_t bugtop, bugleft;
@@ -1018,6 +1034,7 @@ void move_greenBug() {
             {
                 if(lives != 0) lives--;
                 bugs_table[i].alive = 0;
+                bugs_table[i].isShooting = 0;
                 galagaShips_starX = 35;
                 galagaShips_starY = 50;
                 //galagaShips_starX_prev = 35;
@@ -1030,7 +1047,8 @@ void move_greenBug() {
             }
         }
 
-        G8RTOS_OS_Sleep(35);
+        if(bugs_table[i].isShooting) G8RTOS_OS_Sleep(50);
+        else G8RTOS_OS_Sleep(35);
     }
 
 
@@ -1047,31 +1065,45 @@ void out_bullet(uint8_t xpos, uint8_t ypos,  uint8_t red, uint8_t green, uint8_t
 }
 
 
-void  check_bullet_collision(uint8_t xpos, uint8_t ypos ){
-
-
+void  check_bullet_collision(uint8_t xpos, uint8_t ypos, uint8_t fromBug)
+{
     // if (bufferBlue[ypos+(xpos *64)] > 0 || bufferBlue[ypos+(xpos *64)] > 0 || bufferBlue[ypos+(xpos *64)] > 0){
+    if(fromBug == 0)
+    {
+        for (int i = 0 ; i < numOfBugs ; i++)
+        {
+            if (bugs_table[i].alive == 1)
+            {
+                if ((xpos - bugs_table[i].ypos < 5)  && ypos >  bugs_table[i].xpos -1 &&  ypos  <   bugs_table[i].xpos + 5   )
+                {
+                    bugs_table[i].alive = 0;
+                    bugs_table[i].isShooting = 0;
+                    out_bullet(xpos,ypos, 0,0,0 );
 
-    for (int i = 0 ; i < numOfBugs ; i++){
-
-        if (bugs_table[i].alive == 1){
-
-            if ((xpos - bugs_table[i].ypos < 5)  && ypos >  bugs_table[i].xpos -1 &&  ypos  <   bugs_table[i].xpos + 5   ){
-
-
-                bugs_table[i].alive = 0;
-                out_bullet(xpos,ypos, 0,0,0 );
-
-                G8RTOS_KillSelf();
-                while(1);
+                    G8RTOS_KillSelf();
+                    while(1);
+                }
             }
         }
-        //}
-
-
     }
+    else
+    {
+        if((galagaShips_starY - xpos < 5)  && (ypos > galagaShips_starX-1) && (ypos < galagaShips_starX + 9))
+        {
+            out_bullet(xpos,ypos, 0,0,0 );
 
+            if(lives != 0) lives--;
+            galagaShips_starX = 35;
+            galagaShips_starY = 50;
+            add_rectangle(0, galagaShips_starX-1, galagaShips_starX+10, galagaShips_starY-1, galagaShips_starY+9);
 
+            out_image(GalagaShip, galagaShips_starY,galagaShips_starX, 8, 9);
+            G8RTOS_OS_Sleep(100);
+
+            G8RTOS_KillSelf();
+            while(1);
+        }
+    }
 
 }
 
@@ -1087,15 +1119,13 @@ void out_exposion(uint8_t xpos, uint8_t ypos){
     G8RTOS_OS_Sleep(150);
     out_image(Fire3, xpos, ypos, 5,5);
     G8RTOS_OS_Sleep(150);
-
-
-
 }
 
 void enemies_updater(){
 
     uint8_t direction = 0;
     uint8_t counter = 0;
+    uint8_t timetoshoot = 0;
 
     while (1){
 
@@ -1112,6 +1142,7 @@ void enemies_updater(){
                 for (int i = 0; i < numOfBugs ; i++){
                     //   if(bugs_table[i].inTheTable == 1)
                     bugs_table[i].distination_y--;
+                    bugs_table[i].predistination_y--;
 
 
 
@@ -1123,6 +1154,8 @@ void enemies_updater(){
 
             } else
             {
+                if(timetoshoot == 5) timetoshoot = 0;
+                else timetoshoot++;
                 counter = 0;
                 direction = 1;
             }
@@ -1134,6 +1167,7 @@ void enemies_updater(){
                 for (int i = 0; i < numOfBugs ; i++){
                     //  if(bugs_table[i].inTheTable == 1)
                     bugs_table[i].distination_y++;
+                    bugs_table[i].predistination_y++;
 
                 }
 
@@ -1149,12 +1183,23 @@ void enemies_updater(){
 
         }
 
-
+        if(timetoshoot == 3)
+        {
+            for(int i = 0; i < numOfBugs; i++)
+            {
+                if(bugs_table[i].alive)
+                {
+                    bugs_table[i].isShooting = 1;
+                    bugs_table[i].distination_y = galagaShips_starX;
+                    bugs_table[i].distination_x = galagaShips_starY;
+                    G8RTOS_AddThread(&bug_bullet, "bug_bullet", 1);
+                    break;
+                }
+            }
+            timetoshoot++;
+        }
         G8RTOS_OS_Sleep(100);
-
     }
-
-
 }
 
 void menuListener()
@@ -1198,11 +1243,24 @@ static void clearScreen()
     add_rectangle(0, 0,64,0, 64);
 }
 
+static void initialize()
+{
+    menuselect_flag = 1;
+    lives = 3;
+    scoreValue = 0;
+    life_bugs = 0;
+
+    for(int i = 0; i < numOfBugs; i++)
+    {
+        bugs_table[i].alive = 0;
+        bugs_table[i].inTheTable = 0;
+        bugs_table[i].isShooting = 0;
+    }
+}
+
 void menu()
 {
-    //menuselect_flag = 0;
-    lives = 3;
-    life_bugs = 0;
+    initialize();
     clearScreen();
     out_image(logo, 1, 1, 62, 62);
     G8RTOS_OS_Sleep(3000);
@@ -1218,6 +1276,40 @@ void menu()
     outString("ship color", 12, 30, 0x00ffffff);
     outString("brightness", 12, 38, 0x00ffffff);
     //out_image(heart, 56, 2, 4, 5);
+
+//    while(1)
+//    {
+//        add_rectangle( 0, 19, 30, 47, 60);
+//        outString("xpos", 12, 48, 0x00ffffff);
+//        outString("ypos", 12, 56, 0x00ffffff);
+//
+//        if(hi < 10)
+//        {
+//            LM_Text(48, 20, hi, 0x00ffffff);
+//        }
+//        else
+//        {
+//            uint8_t ones = 0, tens = 0;
+//            tens = hi / 10;
+//            ones = hi % 10;
+//            LM_Text(48, 20, hi, 0x00ffffff);
+//            LM_Text(52, 20, hi, 0x00ffffff);
+//        }
+//        if(lo < 10)
+//        {
+//            LM_Text(48, 20, lo, 0x00ffffff);
+//        }
+//        else
+//        {
+//            uint8_t ones = 0, tens = 0;
+//            tens = lo / 10;
+//            ones = lo % 10;
+//            LM_Text(48, 20, lo, 0x00ffffff);
+//            LM_Text(52, 20, lo, 0x00ffffff);
+//        }
+//        G8RTOS_OS_Sleep(50);
+//    }
+
 
     menuItem = 0;
     uint8_t menuPrev = menuItem;
@@ -1274,6 +1366,7 @@ void menu()
                     G8RTOS_OS_Sleep(300);
                     break;
                 }
+                G8RTOS_OS_Sleep(150);
             }
 
             clearScreen();
@@ -1317,7 +1410,6 @@ void menu()
 
     G8RTOS_AddThread(&display_arena, "Arena", 1);
     G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-    //G8RTOS_AddThread(&displayBackground, "Background", 1);
 
     outString("level", 24, 24, 0x00ffffff);
     LM_Text(46, 24, gameLevel, 0x00ffffff);
@@ -1336,9 +1428,9 @@ void menu()
         tempLives--;
     }
 
+    menuselect_flag = 0;
     G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
     G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
-    G8RTOS_AddThread(&followMe, "followme",1);
 
     G8RTOS_KillSelf();
     while(1);
@@ -1366,70 +1458,6 @@ void EndGame()
     G8RTOS_KillSelf();
     while(1);
 }
-
-
-void LaunchApp()
-{
-    out_image(logo, 1, 1, 62, 62);
-    add_rectangle(0, 38, 39, 33, 37);
-
-    G8RTOS_OS_Sleep(2500);
-
-    add_rectangle(0, 0,63,0, 63);
-
-//    LM_Text(2, 6, 35, 0x00ffffff);
-//    add_rectangle( 0x00000f00, 10, 11, 0, 64);
-//    outString("play", 12, 6, 0x00ffffff);
-//    outString("level", 12, 14, 0x00ffffff);
-//    outString("ship select", 12, 22, 0x00ffffff);
-//    outString("ship color", 12, 30, 0x00ffffff);
-//    outString("brightness", 12, 38, 0x00ffffff);
-
-    G8RTOS_AddThread(&menu, "Menu", 1);
-    //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
-
-    //G8RTOS_AddThread(&displayBackground, "Background", 1);
-    //add_rectangle( 0x00000f00, 10, 11, 0, 64);
-
-    //while(1)
-    //{
-//        outString("play", 12, 6, 0x00ffffff);
-//        outString("level", 12, 14, 0x00ffffff);
-//        outString("ship select", 12, 22, 0x00ffffff);
-//        outString("ship color", 12, 30, 0x00ffffff);
-//        outString("brightness", 12, 38, 0x00ffffff);
-    //}
-
-    //G8RTOS_OS_Sleep(5000);
-
-    //add_rectangle(0, 0,63,0, 63);
-
-//    G8RTOS_AddThread(&display_arena, "Arena", 1);
-//    //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-//    G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-//    G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
-//    G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
-//    //G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
-//    //G8RTOS_AddThread(&output_frame, "outputFrame", 1);
-//    //G8RTOS_AddThread(&writeLogo, "logo", 1);
-//    G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
-//
-//    G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
-
-//    add_rectangle(0, 0,63,0, 63);
-//
-//    G8RTOS_AddThread(&display_arena, "Arena", 1);
-//    G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
-//    //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
-//    G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
-//    G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
-//    G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
-
-
-    G8RTOS_KillSelf();
-    while(1);
-}
-
 
 void output_frame(){
 
@@ -1556,7 +1584,7 @@ void followMe(){
 
 
 
-        G8RTOS_OS_Sleep(41);
+        G8RTOS_OS_Sleep(50);
 
     }
 }
