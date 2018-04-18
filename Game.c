@@ -1016,8 +1016,20 @@ void move_greenBug()
             prev_xpos = bugs_table[i].xpos;
             prev_ypos = bugs_table[i].ypos;
         }
+<<<<<<< HEAD
 
 
+/* Collision Stuff */
+        uint8_t bugtop, bugleft;
+        uint8_t shiptop, shipleft;
+=======
+>>>>>>> 94cee4ee493bcb8b2a7a2c54e278a9094faf1c55
+
+        shiptop = galagaShips_starY;
+        shipleft = galagaShips_starX;
+
+<<<<<<< HEAD
+=======
 /* Collision Stuff */
         uint8_t bugtop, bugleft;
         uint8_t shiptop, shipleft;
@@ -1025,6 +1037,7 @@ void move_greenBug()
         shiptop = galagaShips_starY;
         shipleft = galagaShips_starX;
 
+>>>>>>> 94cee4ee493bcb8b2a7a2c54e278a9094faf1c55
         for(int j = 0; j < numOfBugs; j++)
         {
             bugtop = bugs_table[i].ypos;
@@ -1345,10 +1358,17 @@ void menu()
                 {
                     if(gameLevel == 0) gameLevel = 9;
                     else gameLevel--;
+<<<<<<< HEAD
 
                     add_rectangle(0, 30, 34, 23, 30);
                     LM_Text(31, 24, gameLevel, 0x00ffffff);
 
+=======
+
+                    add_rectangle(0, 30, 34, 23, 30);
+                    LM_Text(31, 24, gameLevel, 0x00ffffff);
+
+>>>>>>> 94cee4ee493bcb8b2a7a2c54e278a9094faf1c55
                     G8RTOS_OS_Sleep(300);
                 }
                 else if((sel & 0x02) == 0x02)
@@ -1588,4 +1608,8 @@ void followMe(){
 
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 94cee4ee493bcb8b2a7a2c54e278a9094faf1c55
 

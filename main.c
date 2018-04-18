@@ -91,6 +91,7 @@ void main(void)
     initUARTP3();
 
     //srand(time(NULL));
+<<<<<<< HEAD
 
     //G8RTOS_InitSemaphore(&XpData, 1);
 
@@ -114,6 +115,31 @@ void main(void)
     //G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
 
 
+=======
+
+    //G8RTOS_InitSemaphore(&XpData, 1);
+
+    //G8RTOS_AddThread(&IdleThread, "idle", 255);
+    //G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
+    G8RTOS_AddThread(&IdleThread, "idle", 255);
+    G8RTOS_AddThread(&menu, "LaunchApp", 1);
+    G8RTOS_AddThread(&displayBackground, "Background", 1);
+    G8RTOS_AddThread(&output_frame, "outputFrame", 1);
+    //G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
+    //G8RTOS_AddThread(&followMe, "followme",1);
+    G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
+
+    //G8RTOS_AddThread(&ReceiveUART, "ReceiveUART",1);
+    //G8RTOS_AddThread(&ReceiveUART2, "ReceiveUART",1);
+    //G8RTOS_AddThread(&output_frame, "outputFrame", 1);
+    //G8RTOS_AddThread(&writeLogo, "logo", 1);
+    //G8RTOS_AddThread(&listenForBullets, "listenForBullets",1);
+    //G8RTOS_AddThread(&displayBackground, "Background", 1);
+    //G8RTOS_AddThread(&moveGlagaShip, "Moving Galaga Ship",1);
+    //G8RTOS_AddThread(&add_greenBugs,"add_greenBugs",1);
+
+
+>>>>>>> 94cee4ee493bcb8b2a7a2c54e278a9094faf1c55
     //bufferGreen[0] = 0x01;
     //bufferBlue[0]= 0;
     //bufferRed[0] =0;
