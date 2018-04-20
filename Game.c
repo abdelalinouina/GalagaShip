@@ -701,7 +701,7 @@ void  ReceiveUART_XBee()
 
         // return RXDataL;
 
-        G8RTOS_OS_Sleep(39);
+        G8RTOS_OS_Sleep(89);
     }
 }
 
@@ -1277,6 +1277,8 @@ void menu()
     G8RTOS_OS_Sleep(3000);
 
     G8RTOS_AddThread(&menuListener, "menuListener", 1);
+    G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
+    G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
 
     clearScreen();
     LM_Text(2, 10, 35, 0x00ffffff);
