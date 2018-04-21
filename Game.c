@@ -48,7 +48,13 @@ struct green_bug
 
 typedef struct green_bug green_bug_t;
 
+uint8_t speedPuPhase = 0;
+uint8_t heartBlue = 0;
+uint8_t heartPuPhase = 0;
+uint8_t firePuPhase = 0;
 uint8_t RXData_Pi;
+uint8_t stopDisplayingLogo = 0;
+uint8_t shipBlownUp = 0;
 uint8_t scoreValue = 0;
 uint8_t gameLevel = 0;
 uint8_t lives = 0;
@@ -198,6 +204,18 @@ uint32_t GalagaShip2 [81] =   {0x00000000,0x00000000,0x00d30f03,0x00000000,0X00F
                                0X00FF6666,0X00FF6666,0x00000000,0x00000000,0X00FF0000,0x00000000,0x00000000,0X00FF6666,0X00FF6666
 };
 
+
+uint32_t GalagaShip3 [81] =   {0x00000000,0x00000000,0x00000000,0x00000000,0X00FF0000,0x00000000,0x00000000,0x00000000,0x00000000,
+                               0x00000000,0x00000000,0x00000000,0x00000000,0X00FF6666,0x00000000,0x00000000,0x00000000,0x00000000,
+                               0x00000000,0x00000000,0x00000000,0X00FF6666,0X00FF6666,0X00FF6666,0x00000000,0x00000000,0x00000000,
+                               0X00FF0000,0x00000000,0x00000000,0X00FF6666,0X00FF6666,0X00FF6666,0x00000000,0x00000000,0X00FF0000,
+                               0X00FF6666,0x00000000,0x00000000,0X00FF6666,0x000000FF,0X00FF6666,0x00000000,0x00000000,0X00FF6666,
+                               0X00FF6666,0x00000000,0X00FF0000,0X00FF6666,0x000000FF,0X00FF6666,0X00FF0000,0x00000000,0X00FF6666,
+                               0X00FF6666,0x00000000,0X00FF0000,0X00FF6666,0x000000FF,0X00FF6666,0X00FF0000,0x00000000,0X00FF6666,
+                               0X00FF6666,0X00FF0000,0X00FF0000,0X00FF0000,0X00FF6666,0X00FF0000,0X00FF0000,0X00FF0000,0X00FF6666,
+                               0X00FF0000,0X00FF0000,0x00000000,0x00000000,0X00FF0000,0x00000000,0x00000000,0X00FF0000,0X00FF0000
+};
+
 uint32_t GreenBug [25] = {0x0000592C,0,0,0,0x0000592C,
                           0x0000592C,0x007F7F00,0x007F7F00,0x007F7F00,0x0000592C,
                           0,0X007F007F,0x007F7F00,0X007F007F,0,
@@ -253,6 +271,80 @@ void ButtonsInit()
     P2->DIR = 0;
 }
 
+void drawSpeedPU(uint8_t xpos, uint8_t ypos){
+
+    add_rectangle( 0x000000FF, xpos,xpos+5, ypos, ypos+7);
+
+    add_rectangle( 0, xpos,xpos+1, ypos, ypos+1);
+    add_rectangle( 0, xpos,xpos+1, ypos+6, ypos+7);
+
+    add_rectangle( 0, xpos+4,xpos+5, ypos, ypos+1);
+    add_rectangle( 0, xpos+4,xpos+5, ypos+6, ypos+7);
+
+//    add_rectangle( 0x000000FF, xpos+4,xpos+5, ypos, ypos+7);
+//    add_rectangle( 0x000000FF, xpos,xpos+4, ypos+, ypos+7);
+
+    if (speedPuPhase == 1){
+    LM_Text(xpos+1, ypos, 27, 0x00FF0000);
+
+    speedPuPhase = 0;
+    } else{
+
+        LM_Text(xpos+1, ypos, 27, 0x0000FF00);
+
+           speedPuPhase = 1;
+    }
+
+}
+
+
+void drawFirePU(uint8_t xpos, uint8_t ypos){
+
+    add_rectangle( 0x00FF00, xpos,xpos+5, ypos, ypos+7);
+
+    add_rectangle( 0, xpos,xpos+1, ypos, ypos+1);
+    add_rectangle( 0, xpos,xpos+1, ypos+6, ypos+7);
+
+    add_rectangle( 0, xpos+4,xpos+5, ypos, ypos+1);
+    add_rectangle( 0, xpos+4,xpos+5, ypos+6, ypos+7);
+
+//    add_rectangle( 0x000000FF, xpos+4,xpos+5, ypos, ypos+7);
+//    add_rectangle( 0x000000FF, xpos,xpos+4, ypos+, ypos+7);
+
+    if (firePuPhase == 1){
+    LM_Text(xpos+1, ypos, 15, 0x00FF0000);
+
+    firePuPhase = 0;
+    } else{
+
+        LM_Text(xpos+1, ypos, 15, 0x000000FF);
+
+        firePuPhase = 1;
+    }
+
+}
+
+void drawHeartPU(uint8_t xpos, uint8_t ypos){
+
+
+
+//    add_rectangle( 0x000000FF, xpos+4,xpos+5, ypos, ypos+7);
+//    add_rectangle( 0x000000FF, xpos,xpos+4, ypos+, ypos+7);
+
+    if (heartPuPhase == 1){
+
+        out_image(heart, xpos, ypos, 4, 5);
+    heartPuPhase = 0;
+    } else{
+
+        out_image(heartBlue, xpos, ypos, 4, 5);
+
+        heartPuPhase = 1;
+    }
+
+}
+
+
 void display_arena()
 {
      uint8_t line_x_start = 10;
@@ -280,6 +372,39 @@ void display_arena()
             out_image(heart, 59, tempXP1, 4, 5);
             tempXP1 += 6;
             tempLives1--;
+        }
+
+/* progression of the game */
+        if(scoreValue == 12 && gameLevel == 0)
+        {
+            life_bugs = 10;
+            galagaShips_starX = 35;
+            galagaShips_starY = 50;
+            gameLevel++;
+            outString("level", 24, 24, 0x00ffffff);
+            LM_Text(46, 24, gameLevel, 0x00ffffff);
+
+            G8RTOS_OS_Sleep(3000);
+
+            add_rectangle( 0, 24, 60, 24, 31);
+
+            life_bugs = 0;
+        }
+
+        if(scoreValue == 30 && gameLevel == 1)
+        {
+            life_bugs = 10;
+            galagaShips_starX = 35;
+            galagaShips_starY = 50;
+            gameLevel++;
+            outString("level", 24, 24, 0x00ffffff);
+            LM_Text(46, 24, gameLevel, 0x00ffffff);
+
+            G8RTOS_OS_Sleep(3000);
+
+            add_rectangle( 0, 24, 60, 24, 31);
+
+            life_bugs = 0;
         }
 
         G8RTOS_OS_Sleep(55);
@@ -786,6 +911,7 @@ void listenForBullets()
 
         if(lives == 0)
         {
+            stopDisplayingLogo = 1;
             G8RTOS_AddThread(&EndGame, "End", 1);
         }
         G8RTOS_OS_Sleep(50);
@@ -822,11 +948,17 @@ void move_bullet()
 
 void bug_bullet()
 {
-    G8RTOS_OS_Sleep(800);
     bullet_t b;
+    uint8_t firstSleep = 0;
+    uint32_t random = (rand() % 1000) + 1200;
+    if(!firstSleep)
+    {
+        G8RTOS_OS_Sleep(random);
+        firstSleep = 1;
+    }
     for(int i = 0; i < numOfBugs; i++)
     {
-        if(bugs_table[i].isShooting = 1 && bugs_table[i].alive)
+        if(bugs_table[i].isShooting == 1 && bugs_table[i].alive)
         {
             b.ypos = bugs_table[i].xpos;
             b.xpos = bugs_table[i].ypos+4;
@@ -878,8 +1010,8 @@ void add_greenBugs(){
     while(1){
         yOffset = 5;
         xOffset = 5;
-        if (life_bugs == 0){
-
+        if (life_bugs == 0)
+        {
             life_bugs = numOfBugs;
 
             for (int i = 0; i < numOfBugs; i++){
@@ -926,6 +1058,7 @@ void move_greenBug()
     uint8_t prev_xpos,  prev_ypos, xpos, ypos ;
     prev_ypos = path_Y[path_index]-5;
     prev_xpos = path_X[path_index]-5;
+    uint8_t flg = 0;
     int i=0;
     while(bugs_table[i].alive == 1)
     {
@@ -949,6 +1082,7 @@ void move_greenBug()
             if(scoreValue == 100)
             {
                 scoreValue = 0;
+                lives++;
             }
 
             out_exposion( bugs_table[i].ypos,  bugs_table[i].xpos);
@@ -1005,9 +1139,19 @@ void move_greenBug()
 
             if(bugs_table[i].ypos == bugs_table[i].distination_x && bugs_table[i].xpos ==  bugs_table[i].distination_y)
             {
-                bugs_table[i].distination_y = bugs_table[i].predistination_y;
-                bugs_table[i].distination_x = bugs_table[i].predistination_x;
-                bugs_table[i].isShooting = 0;
+                if(gameLevel == 1 && bugs_table[i].isShooting == 1 && flg == 0)
+                {
+                    bugs_table[i].distination_y = 52;
+                    bugs_table[i].distination_x = 35;
+                    flg = 1;
+                }
+                else
+                {
+                    bugs_table[i].distination_y = bugs_table[i].predistination_y;
+                    bugs_table[i].distination_x = bugs_table[i].predistination_x;
+                    bugs_table[i].isShooting = 0;
+                    flg = 0;
+                }
             }
 
             add_rectangle( 0, prev_xpos, prev_xpos+5, prev_ypos, prev_ypos+5);
@@ -1035,6 +1179,7 @@ void move_greenBug()
                 if(lives != 0) lives--;
                 bugs_table[i].alive = 0;
                 bugs_table[i].isShooting = 0;
+                out_exposion( galagaShips_starY,  galagaShips_starX);
                 galagaShips_starX = 35;
                 galagaShips_starY = 50;
                 //galagaShips_starX_prev = 35;
@@ -1088,7 +1233,7 @@ void  check_bullet_collision(uint8_t xpos, uint8_t ypos, uint8_t fromBug)
     }
     else
     {
-        if((galagaShips_starY - xpos < 5)  && (ypos > galagaShips_starX-1) && (ypos < galagaShips_starX + 9))
+        if((galagaShips_starY - xpos < 2)  && (ypos > galagaShips_starX-1) && (ypos < galagaShips_starX + 9))
         {
             out_bullet(xpos,ypos, 0,0,0 );
 
@@ -1126,6 +1271,7 @@ void enemies_updater(){
     uint8_t direction = 0;
     uint8_t counter = 0;
     uint8_t timetoshoot = 0;
+    uint8_t jj = 0;
 
     while (1){
 
@@ -1154,7 +1300,7 @@ void enemies_updater(){
 
             } else
             {
-                if(timetoshoot == 5) timetoshoot = 0;
+                if(timetoshoot == 1) timetoshoot = 0;
                 else timetoshoot++;
                 counter = 0;
                 direction = 1;
@@ -1183,20 +1329,44 @@ void enemies_updater(){
 
         }
 
-        if(timetoshoot == 3)
+        if(timetoshoot == 1 && gameLevel == 1)
         {
             for(int i = 0; i < numOfBugs; i++)
             {
-                if(bugs_table[i].alive)
+                if(bugs_table[jj].alive)
                 {
-                    bugs_table[i].isShooting = 1;
-                    bugs_table[i].distination_y = galagaShips_starX;
-                    bugs_table[i].distination_x = galagaShips_starY;
+                    bugs_table[jj].isShooting = 1;
+                    bugs_table[jj].distination_y = 12;
+                    bugs_table[jj].distination_x = 35;
                     G8RTOS_AddThread(&bug_bullet, "bug_bullet", 1);
+                    if(jj > 5) jj = 0;
+                    else jj++;
                     break;
                 }
+                if(jj > 5) jj = 0;
+                else jj++;
             }
-            timetoshoot++;
+            timetoshoot = 0;
+        }
+
+        if(timetoshoot == 1 && gameLevel == 2)
+        {
+            for(int i = 0; i < numOfBugs; i++)
+            {
+                if(bugs_table[jj].alive)
+                {
+                    bugs_table[jj].isShooting = 1;
+                    bugs_table[jj].distination_y = galagaShips_starX;
+                    bugs_table[jj].distination_x = galagaShips_starY;
+                    G8RTOS_AddThread(&bug_bullet, "bug_bullet", 1);
+                    if(jj > 5) jj = 0;
+                    else jj++;
+                    break;
+                }
+                if(jj > 5) jj = 0;
+                else jj++;
+            }
+            timetoshoot = 0;
         }
         G8RTOS_OS_Sleep(100);
     }
@@ -1257,6 +1427,7 @@ static void clearScreen()
 static void initialize()
 {
     menuselect_flag = 1;
+    gameLevel = 0;
     lives = 3;
     scoreValue = 0;
     life_bugs = 0;
@@ -1273,8 +1444,12 @@ void menu()
 {
     initialize();
     clearScreen();
-    out_image(logo, 1, 1, 62, 62);
-    G8RTOS_OS_Sleep(3000);
+
+    if(!stopDisplayingLogo)
+    {
+        out_image(logo, 1, 1, 62, 62);
+        G8RTOS_OS_Sleep(3000);
+    }
 
     G8RTOS_AddThread(&menuListener, "menuListener", 1);
     G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
@@ -1319,11 +1494,14 @@ void menu()
             outString(">", 41, 36, 0x00ffffff);
             //sel = 0;
             G8RTOS_OS_Sleep(500);
+            uint8_t templo;
+            templo = lo;
 
             while(1)
             {
-                sel = RXDataL;
-                if((sel & 0x01) == 0x01)
+                //sel = RXDataL;
+                //if((sel & 0x01) == 0x01)
+                if(templo)
                 {
                     if(gameLevel == 0) gameLevel = 9;
                     else gameLevel--;
@@ -1352,12 +1530,16 @@ void menu()
             }
 
             clearScreen();
+            LM_Text(2, 10, 35, 0x00ffffff);
+            LM_Text(2, 20, 35, 0x00030303);
+            LM_Text(2, 30, 35, 0x00030303);
+            LM_Text(2, 40, 35, 0x00030303);
             add_rectangle( 0x00000f00, 10, 11, 0, 64);
-            outString("play", 12, 6, 0x00ffffff);
-            outString("level", 12, 14, 0x00ffffff);
-            outString("ship select", 12, 22, 0x00ffffff);
-            outString("ship color", 12, 30, 0x00ffffff);
-            outString("brightness", 12, 38, 0x00ffffff);
+            outString("play", 12, 10, 0x00ffffff);
+            outString("level", 12, 20, 0x00ffffff);
+            outString("ship select", 12, 30, 0x00ffffff);
+            outString("ship color", 12, 40, 0x00ffffff);
+            outString("go", 26, 55, 0x00ffffff);
             menuPrev = 0;
             menuItem = 1;
         }

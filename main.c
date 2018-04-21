@@ -13,6 +13,7 @@
 #include <stdint.h>
 //#include "app.h"
 #include "Game.h"
+#include "time.h"
 
 #include <string.h>
 //#include "Cube.h"
@@ -90,7 +91,7 @@ void main(void)
     initUART_XBee();
     initUARTP2();
 
-    //srand(time(NULL));
+    srand(time(NULL));
 
     //G8RTOS_InitSemaphore(&XpData, 1);
 
