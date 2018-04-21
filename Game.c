@@ -48,6 +48,7 @@ struct green_bug
 
 typedef struct green_bug green_bug_t;
 
+uint8_t shipChoice = 0;
 uint8_t speedPuPhase = 0;
 uint8_t heartBlue = 0;
 uint8_t heartPuPhase = 0;
@@ -58,6 +59,8 @@ uint8_t shipBlownUp = 0;
 uint8_t scoreValue = 0;
 uint8_t gameLevel = 0;
 uint8_t lives = 0;
+uint8_t shipExplosionFlag = 0;
+uint8_t shipExplosionFlag2 = 0;
 static green_bug_t bugs_table[20];
 uint8_t bullet_flag = 0;
 uint8_t menuselect_flag = 0;
@@ -66,6 +69,7 @@ uint8_t menuItem = 0;
 volatile uint8_t RXDataL, RXDataL_temp = 0;
 #define MAX_stars 15
 uint8_t life_bugs =0;
+uint8_t PowerUP_xpos, PowerUP_ypos;
 static star_t stars_table[MAX_stars];
 
 uint8_t Zero[3] = {0x1F,0x11,0x1F};
@@ -756,35 +760,49 @@ void displayBackground(){
 void moveGlagaShip(){
 
     uint8_t byte;
-    // RXDataL_temp = RXDataL;
+    //RXDataL_temp = RXDataL;
     while(1){
 
 
-        //G8RTOS_WaitSemaphore(&XpData);
+        if (shipExplosionFlag2 == 1)
+        {
+            shipExplosionFlag2 = 0 ;
+            //killTheShip(galagaShips_starY,galagaShips_starX);
+            G8RTOS_KillSelf();
+        }
+        if(shipExplosionFlag == 0)
+        {
+            //G8RTOS_WaitSemaphore(&XpData);
+            byte = RXDataL;
+
+           // G8RTOS_SignalSemaphore(&XpData);
+
+            if ( get_bit(1, byte) == 0x01) galagaShips_starX++;
+            if (galagaShips_starX >=54) galagaShips_starX = 54;
+            if ( get_bit(0, byte) == 0x01) galagaShips_starX--;
+            if (galagaShips_starX <=12) galagaShips_starX = 12;
+            if ( get_bit(3, byte) == 0x01) galagaShips_starY++;
+            if (galagaShips_starY >=49) galagaShips_starY = 49;
+            if ( get_bit(2, byte) == 0x01) galagaShips_starY--;
+            if (galagaShips_starY <=1) galagaShips_starY = 1;
+
+            add_rectangle( 0, galagaShips_starX_prev, galagaShips_starX_prev+10, galagaShips_starY_prev, galagaShips_starY_prev+10);
+            if(shipChoice == 0) out_image(GalagaShip, galagaShips_starY,galagaShips_starX, 8, 9);
+            else if(shipChoice == 1) out_image(GalagaShip2, galagaShips_starY,galagaShips_starX, 9, 9);
+            else if(shipChoice == 1) out_image(GalagaShip3, galagaShips_starY,galagaShips_starX, 9, 9);
 
 
-        byte = RXDataL;
+            galagaShips_starY_prev = galagaShips_starY;
+            galagaShips_starX_prev = galagaShips_starX;
 
-       // G8RTOS_SignalSemaphore(&XpData);
-
-        if ( get_bit(1, byte) == 0x01) galagaShips_starX++;
-        if (galagaShips_starX >=54) galagaShips_starX = 54;
-        if ( get_bit(0, byte) == 0x01) galagaShips_starX--;
-        if (galagaShips_starX <=12) galagaShips_starX = 12;
-        if ( get_bit(3, byte) == 0x01) galagaShips_starY++;
-        if (galagaShips_starY >=49) galagaShips_starY = 49;
-        if ( get_bit(2, byte) == 0x01) galagaShips_starY--;
-        if (galagaShips_starY <=1) galagaShips_starY = 1;
-
-        add_rectangle( 0, galagaShips_starX_prev, galagaShips_starX_prev+10, galagaShips_starY_prev, galagaShips_starY_prev+10);
-        out_image(GalagaShip, galagaShips_starY,galagaShips_starX, 8, 9);
-
-        galagaShips_starY_prev = galagaShips_starY;
-        galagaShips_starX_prev = galagaShips_starX;
-
-        G8RTOS_OS_Sleep(41);
+            G8RTOS_OS_Sleep(41);
+        }
+        else
+        {
+            shipExplosionFlag = 0;
+            G8RTOS_OS_Sleep(4100);
+        }
     }
-
 }
 
 uint8_t get_bit(uint8_t shift, uint8_t byte)
@@ -909,20 +927,29 @@ void listenForBullets()
 {
     while(1)
     {
-        if (bullet_flag == 1)
+        if (shipExplosionFlag == 0)
         {
-            G8RTOS_AddThread(&move_bullet, "move_bullet", 1);
-            bullet_flag = 0;
-            G8RTOS_OS_Sleep(1000);
-            bullet_flag = 0;
+            if (bullet_flag == 1)
+            {
+                G8RTOS_AddThread(&move_bullet, "move_bullet", 1);
+                bullet_flag = 0;
+                G8RTOS_OS_Sleep(1000);
+                bullet_flag = 0;
+            }
+            if(lives == 0)
+            {
+                stopDisplayingLogo = 1;
+                G8RTOS_OS_Sleep(3900);
+                G8RTOS_AddThread(&EndGame, "End", 1);
+            }
+            G8RTOS_OS_Sleep(50);
         }
-
-        if(lives == 0)
+        else
         {
-            stopDisplayingLogo = 1;
-            G8RTOS_AddThread(&EndGame, "End", 1);
+            shipExplosionFlag = 0;
+            G8RTOS_OS_Sleep(4000);
+            G8RTOS_AddThread(&moveGlagaShip, "move_GalgaShip", 1);
         }
-        G8RTOS_OS_Sleep(50);
     }
 }
 
@@ -1187,14 +1214,8 @@ void move_greenBug()
                 if(lives != 0) lives--;
                 bugs_table[i].alive = 0;
                 bugs_table[i].isShooting = 0;
-                out_exposion( galagaShips_starY,  galagaShips_starX);
-                galagaShips_starX = 35;
-                galagaShips_starY = 50;
-                //galagaShips_starX_prev = 35;
-                //galagaShips_starY_prev = 50;
-                add_rectangle(0, shipleft-1, shipleft+10, shiptop-1, shiptop+9);
+                killTheShip( shipleft,  shiptop);
 
-                out_image(GalagaShip, galagaShips_starY,galagaShips_starX, 8, 9);
                 G8RTOS_OS_Sleep(100);
                 break;
             }
@@ -1205,6 +1226,35 @@ void move_greenBug()
     }
 
 
+}
+
+void shipExplosion(uint8_t xpos, uint8_t ypos){
+
+    out_image(Fire3, xpos, ypos, 5,5);
+    out_image(Fire3, xpos+5, ypos, 5,5);
+    out_image(Fire3, xpos, ypos+5, 5,5);
+    out_image(Fire3, xpos+5, ypos+5, 5,5);
+    G8RTOS_OS_Sleep(150);
+    out_image(Fire2, xpos, ypos, 5,5);
+    out_image(Fire2, xpos+5, ypos, 5,5);
+    out_image(Fire2, xpos, ypos+5, 5,5);
+    out_image(Fire2, xpos+5, ypos+5, 5,5);
+    G8RTOS_OS_Sleep(150);
+    out_image(Fire1, xpos, ypos, 5,5);
+    out_image(Fire1, xpos+5, ypos, 5,5);
+    out_image(Fire1, xpos, ypos+5, 5,5);
+    out_image(Fire1, xpos+5, ypos+5, 5,5);
+    G8RTOS_OS_Sleep(150);
+    out_image(Fire2, xpos, ypos, 5,5);
+    out_image(Fire2, xpos+5, ypos, 5,5);
+    out_image(Fire2, xpos, ypos+5, 5,5);
+    out_image(Fire2, xpos+5, ypos+5, 5,5);
+    G8RTOS_OS_Sleep(150);
+    out_image(Fire3, xpos, ypos, 5,5);
+    out_image(Fire3, xpos+5, ypos, 5,5);
+    out_image(Fire3, xpos, ypos+5, 5,5);
+    out_image(Fire3, xpos+5, ypos+5, 5,5);
+    G8RTOS_OS_Sleep(150);
 }
 
 void out_bullet(uint8_t xpos, uint8_t ypos,  uint8_t red, uint8_t green, uint8_t blue){
@@ -1233,6 +1283,13 @@ void  check_bullet_collision(uint8_t xpos, uint8_t ypos, uint8_t fromBug)
                     bugs_table[i].isShooting = 0;
                     out_bullet(xpos,ypos, 0,0,0 );
 
+                    if (scoreValue%10 -8  == 0)
+                    {
+                        PowerUP_xpos = ypos;
+                        PowerUP_ypos = xpos;
+                        G8RTOS_AddThread(&MovePoweUP, "MoveFirePoweUP", 1);
+                    }
+
                     G8RTOS_KillSelf();
                     while(1);
                 }
@@ -1246,11 +1303,7 @@ void  check_bullet_collision(uint8_t xpos, uint8_t ypos, uint8_t fromBug)
             out_bullet(xpos,ypos, 0,0,0 );
 
             if(lives != 0) lives--;
-            galagaShips_starX = 35;
-            galagaShips_starY = 50;
-            add_rectangle(0, galagaShips_starX-1, galagaShips_starX+10, galagaShips_starY-1, galagaShips_starY+9);
-
-            out_image(GalagaShip, galagaShips_starY,galagaShips_starX, 8, 9);
+            killTheShip( galagaShips_starX,  galagaShips_starY);            G8RTOS_OS_Sleep(100);
             G8RTOS_OS_Sleep(100);
 
             G8RTOS_KillSelf();
@@ -1473,23 +1526,33 @@ void menu()
     outString("level", 12, 20, 0x00ffffff);
     outString("ship select", 12, 30, 0x00ffffff);
     outString("ship color", 12, 40, 0x00ffffff);
-    //outString("go", 26, 55, 0x00ffffff);
     out_image(confirmArrow, 54, 52, 7, 10);
 
     menuItem = 0;
     uint8_t menuPrev = menuItem;
     uint8_t sel = RXDataL;
-    uint8_t ytemp, xtemp;
+    uint8_t ytemp, xtemp, ytempprev, xtempprev;
 
     while(1)
     {
+        sel = RXDataL;
+        if((sel & 0x08) == 0x08)
+        {
+            if(menuItem == 3) menuItem = 0;
+            else menuItem++;
+        }
+        else if((sel & 0x04) == 0x04)
+        {
+            if(menuItem == 0) menuItem = 3;
+            else menuItem--;
+        }
+
         ytemp = hi;
         xtemp = lo;
         if(ytemp < 25 && xtemp < 20) menuItem = 0;
         else if(ytemp >= 25 && ytemp < 31 && xtemp < 20) menuItem = 1;
         else if(ytemp >= 31 && ytemp < 36 && xtemp < 20) menuItem = 2;
         else if(ytemp > 36 && xtemp < 20) menuItem = 3;
-        sel = RXDataL;
 
         if(menuPrev != menuItem)
         {
@@ -1498,29 +1561,29 @@ void menu()
             LM_Text(2, ((10*menuItem)+10), 35, 0x00ffffff);
             menuPrev = menuItem;
         }
-        else if(xtemp > 42 && ytemp > 50 && menuPrev == 0)    //PLAY
+        else if(((xtemp > 42 && ytemp > 51) || ((sel & 0x10) == 0x10)) && menuPrev == 0)    //PLAY
         {
             break;
         }
-        else if(xtemp > 42 && ytemp > 50 && menuPrev == 1)    //Level Select
+        else if(((xtemp > 42 && ytemp > 51) || ((sel & 0x10) == 0x10)) && menuPrev == 1)    //Level Select
         {
             clearScreen();
             outString("Select Level", 12, 14, 0x00ffffff);
             LM_Text(31, 24, gameLevel, 0x00ffffff);
             outString("<", 21, 36, 0x00ffffff);
             outString(">", 41, 36, 0x00ffffff);
-            //sel = 0;
+            out_image(confirmArrow, 54, 52, 7, 10);
+
             G8RTOS_OS_Sleep(500);
-            uint8_t templo;
-            templo = lo;
 
             while(1)
             {
-                //sel = RXDataL;
-                //if((sel & 0x01) == 0x01)
-                if(templo)
+                sel = RXDataL;
+                ytemp = hi;
+                xtemp = lo;
+                if(((sel & 0x01) == 0x01) || (xtemp > 24 && xtemp < 29 && ytemp > 33 && ytemp < 39))
                 {
-                    if(gameLevel == 0) gameLevel = 9;
+                    if(gameLevel == 0) gameLevel = 2;
                     else gameLevel--;
 
                     add_rectangle(0, 30, 34, 23, 30);
@@ -1528,9 +1591,9 @@ void menu()
 
                     G8RTOS_OS_Sleep(300);
                 }
-                else if((sel & 0x02) == 0x02)
+                else if(((sel & 0x02) == 0x02) || (xtemp > 37 && xtemp < 42 && ytemp > 33 && ytemp < 41))
                 {
-                    if(gameLevel == 9) gameLevel = 0;
+                    if(gameLevel == 2) gameLevel = 0;
                     else gameLevel++;
 
                     add_rectangle(0, 30, 34, 23, 30);
@@ -1538,7 +1601,7 @@ void menu()
 
                     G8RTOS_OS_Sleep(300);
                 }
-                else if((sel & 0x10) == 0x10)
+                else if((xtemp > 42 && ytemp > 51) || ((sel & 0x10) == 0x10))
                 {
                     G8RTOS_OS_Sleep(300);
                     break;
@@ -1556,20 +1619,92 @@ void menu()
             outString("level", 12, 20, 0x00ffffff);
             outString("ship select", 12, 30, 0x00ffffff);
             outString("ship color", 12, 40, 0x00ffffff);
-            outString("go", 26, 55, 0x00ffffff);
+            out_image(confirmArrow, 54, 52, 7, 10);
             menuPrev = 0;
             menuItem = 1;
         }
-        else if(xtemp > 42 && ytemp > 50 && menuPrev == 2)    //Ship Select
+        else if(((xtemp > 42 && ytemp > 51) || ((sel & 0x10) == 0x10)) && menuPrev == 2)    //Ship Select
         {
-            break;
+            clearScreen();
+            outString("choose ship", 12, 14, 0x00ffffff);
+            //LM_Text(31, 24, shipChoice, 0x00ffffff);
+            outString("<", 21, 36, 0x00ffffff);
+            outString(">", 41, 36, 0x00ffffff);
+            out_image(confirmArrow, 54, 52, 7, 10);
+
+            if(shipChoice == 0)
+            {
+                add_rectangle(0, 26, 36, 33, 43);
+                out_image(GalagaShip, 34, 28, 8, 9);
+            }
+            else if(shipChoice == 1) out_image(GalagaShip2, 34, 28, 9, 9);
+            else if(shipChoice == 2) out_image(GalagaShip3, 34, 28, 9, 9);
+
+            G8RTOS_OS_Sleep(500);
+
+            while(1)
+            {
+                sel = RXDataL;
+                ytemp = hi;
+                xtemp = lo;
+                if(((sel & 0x01) == 0x01) || (xtemp > 24 && xtemp < 29 && ytemp > 33 && ytemp < 39))
+                {
+                    if(shipChoice == 0) shipChoice = 2;
+                    else shipChoice--;
+
+                    if(shipChoice == 0)
+                    {
+                        add_rectangle(0, 26, 36, 33, 43);
+                        out_image(GalagaShip, 34, 28, 8, 9);
+                    }
+                    else if(shipChoice == 1) out_image(GalagaShip2, 34, 28, 9, 9);
+                    else if(shipChoice == 2) out_image(GalagaShip3, 34, 28, 9, 9);
+
+                    G8RTOS_OS_Sleep(300);
+                }
+                else if(((sel & 0x02) == 0x02) || (xtemp > 37 && xtemp < 42 && ytemp > 33 && ytemp < 41))
+                {
+                    if(shipChoice == 2) shipChoice = 0;
+                    else shipChoice++;
+
+                    if(shipChoice == 0)
+                    {
+                        add_rectangle(0, 26, 36, 33, 43);
+                        out_image(GalagaShip, 34, 28, 8, 9);
+                    }
+                    else if(shipChoice == 1) out_image(GalagaShip2, 34, 28, 9, 9);
+                    else if(shipChoice == 2) out_image(GalagaShip3, 34, 28, 9, 9);
+
+                    G8RTOS_OS_Sleep(300);
+                }
+                else if((xtemp > 42 && ytemp > 51) || ((sel & 0x10) == 0x10))
+                {
+                    G8RTOS_OS_Sleep(300);
+                    break;
+                }
+                G8RTOS_OS_Sleep(150);
+            }
+
+            clearScreen();
+            LM_Text(2, 10, 35, 0x00ffffff);
+            LM_Text(2, 20, 35, 0x00030303);
+            LM_Text(2, 30, 35, 0x00030303);
+            LM_Text(2, 40, 35, 0x00030303);
+            add_rectangle( 0x00000f00, 10, 11, 0, 64);
+            outString("play", 12, 10, 0x00ffffff);
+            outString("level", 12, 20, 0x00ffffff);
+            outString("ship select", 12, 30, 0x00ffffff);
+            outString("ship color", 12, 40, 0x00ffffff);
+            out_image(confirmArrow, 54, 52, 7, 10);
+            menuPrev = 0;
+            menuItem = 2;
         }
-        else if(xtemp > 42 && ytemp > 50 && menuPrev == 3)    //Color Select
+        else if(((xtemp > 42 && ytemp > 51) || ((sel & 0x10) == 0x10)) && menuPrev == 3)    //Color Select
         {
             break;
         }
 
-        G8RTOS_OS_Sleep(50);
+        G8RTOS_OS_Sleep(200);
     }
 
     clearScreen();
@@ -1779,4 +1914,41 @@ void followMe(){
     }
 }
 
+void killTheShip(uint8_t shipleft, uint8_t shiptop)
+{
+    galagaShips_starX = 35;
+    galagaShips_starY = 50;
+    shipExplosionFlag = 1;
+    shipExplosionFlag2 = 1;
+    G8RTOS_OS_Sleep(50);
+    shipExplosion(shiptop,shipleft);
+    add_rectangle(0, shipleft-1, shipleft+10, shiptop-1, shiptop+9);
+    add_rectangle(0, shipleft-1, shipleft+10, shiptop-1, shipleft+9);
+}
+
+void MovePoweUP()
+{
+    uint8_t PU_pre_xpos = PowerUP_xpos;
+    uint8_t PU_pre_ypos = PowerUP_ypos;
+
+    while(1)
+    {
+        add_rectangle(0, PU_pre_xpos, PU_pre_xpos+5, PU_pre_ypos,PU_pre_ypos+5);
+        drawSpeedPU(PowerUP_xpos,PowerUP_ypos );
+
+
+        PU_pre_xpos = PowerUP_xpos;
+        PU_pre_ypos = PowerUP_ypos;
+        PowerUP_ypos++;
+
+        if(PowerUP_ypos == 55)
+        {
+            add_rectangle(0, PowerUP_xpos, PowerUP_xpos+5, PowerUP_ypos,PowerUP_ypos+5);
+            G8RTOS_KillSelf();
+            while(1);
+        }
+
+        G8RTOS_OS_Sleep(120);
+    }
+}
 

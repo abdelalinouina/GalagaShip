@@ -55,6 +55,9 @@ void add_greenBugs();
 void check_bullet_collision(uint8_t xpos, uint8_t ypos, uint8_t fromBug);
 void out_exposion(uint8_t xpos, uint8_t ypos);
 void enemies_updater();
+void shipExplosion(uint8_t xpos, uint8_t ypos);
+void killTheShip(uint8_t shipleft, uint8_t shiptop);
+void MovePoweUP();
 
 void menuListener();
 
