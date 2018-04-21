@@ -112,7 +112,7 @@ uint8_t path_X[100] = {64,63,62,62,61,60,59,58,58,57,55,54,54,52,51,50,49,48,47,
 uint8_t path_Y[100] = {35,35,35,36,36,36,37,37,38,38,39,39,40,40,41,41,41,42,42,43,43,43,43,43,44,43,43,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25};
 int8_t galagaShips_starY = 50;
 int8_t galagaShips_starX = 35;
-uint8_t lo, hi;
+uint8_t lo = 0, hi = 0;
 uint8_t to_be_deleted_x, to_be_deleted_y;
 int8_t galagaShips_starY_prev, galagaShips_starX_prev ;
 
@@ -249,6 +249,14 @@ uint32_t heart[20] = {0, 0x00ff0000, 0, 0x00ff0000, 0,
                       0x00ff0000, 0x00ff0000, 0x00ff0000, 0x00ff0000, 0x00ff0000,
                       0, 0x00ff0000, 0x00ff0000, 0x00ff0000, 0,
                       0, 0, 0x00ff0000, 0, 0};
+
+uint32_t confirmArrow[70] = {0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff,
+                             0x000000ff, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x00000000, 0x000000ff,
+                             0x000000ff, 0x00000000, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x000000ff,
+                             0x000000ff, 0x00000000, 0x00000000, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x000000ff,
+                             0x000000ff, 0x00000000, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x000000ff,
+                             0x000000ff, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x00ff0f00, 0x00ff0f00, 0x00000000, 0x00000000, 0x000000ff,
+                             0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff, 0x000000ff};
 
 void IdleThread()
 {
@@ -1451,7 +1459,7 @@ void menu()
         G8RTOS_OS_Sleep(3000);
     }
 
-    G8RTOS_AddThread(&menuListener, "menuListener", 1);
+    //G8RTOS_AddThread(&menuListener, "menuListener", 1);
     G8RTOS_AddThread(&ReceiveUART_Pi, "ReceiveUART",1);
     G8RTOS_AddThread(&ReceiveUART_XBee, "ReceiveUART",1);
 
@@ -1465,15 +1473,24 @@ void menu()
     outString("level", 12, 20, 0x00ffffff);
     outString("ship select", 12, 30, 0x00ffffff);
     outString("ship color", 12, 40, 0x00ffffff);
-    outString("go", 26, 55, 0x00ffffff);
+    //outString("go", 26, 55, 0x00ffffff);
+    out_image(confirmArrow, 54, 52, 7, 10);
 
     menuItem = 0;
     uint8_t menuPrev = menuItem;
     uint8_t sel = RXDataL;
+    uint8_t ytemp, xtemp;
 
     while(1)
     {
+        ytemp = hi;
+        xtemp = lo;
+        if(ytemp < 25 && xtemp < 20) menuItem = 0;
+        else if(ytemp >= 25 && ytemp < 31 && xtemp < 20) menuItem = 1;
+        else if(ytemp >= 31 && ytemp < 36 && xtemp < 20) menuItem = 2;
+        else if(ytemp > 36 && xtemp < 20) menuItem = 3;
         sel = RXDataL;
+
         if(menuPrev != menuItem)
         {
             //add_rectangle(0, 2, 5, ((10*menuPrev)+10), ((10*menuPrev)+16));
@@ -1481,11 +1498,11 @@ void menu()
             LM_Text(2, ((10*menuItem)+10), 35, 0x00ffffff);
             menuPrev = menuItem;
         }
-        else if(((sel & 0x10) == 0x10) && menuPrev == 0)    //PLAY
+        else if(xtemp > 42 && ytemp > 50 && menuPrev == 0)    //PLAY
         {
             break;
         }
-        else if(((sel & 0x10) == 0x10) && menuPrev == 1)    //Level Select
+        else if(xtemp > 42 && ytemp > 50 && menuPrev == 1)    //Level Select
         {
             clearScreen();
             outString("Select Level", 12, 14, 0x00ffffff);
@@ -1543,13 +1560,13 @@ void menu()
             menuPrev = 0;
             menuItem = 1;
         }
-        else if(((sel & 0x10) == 0x10) && menuPrev == 2)    //Ship Select
+        else if(xtemp > 42 && ytemp > 50 && menuPrev == 2)    //Ship Select
         {
-
+            break;
         }
-        else if(((sel & 0x10) == 0x10) && menuPrev == 3)    //Color Select
+        else if(xtemp > 42 && ytemp > 50 && menuPrev == 3)    //Color Select
         {
-
+            break;
         }
 
         G8RTOS_OS_Sleep(50);
